@@ -73,18 +73,28 @@ ls -l /mnt/mimiciv/1.0/icu
 
 **Solution:**
 The `zcat` command can display the contents of a gzipped file. It works with both compressed file and uncompressed.
-The `zless` and `zmore` commands are used to paginate the compressed file.
-The `zgrep` command is used to search inside the compressed file. The file would be uncompressed if needed and fed to the `grep` command. This command is especially useful for finding and displaying lines with specific features.
+The `zless` and `zmore` commands are used to paginate the compressed file. They both browse the compressed file screen by screen. The `zless` command can browse the zipped file faster and has more functionality.
+The `zgrep` command is used to search inside the compressed file. The file would be uncompressed if needed and fed to the `grep` command, which prints out the lines that match the expression. This command is especially useful for finding and displaying lines with specific features.
 
 
 4. What's the output of following bash script?
-    ```{bash, eval=F}
+    ```{bash, eval=T}
     for datafile in /mnt/mimiciv/1.0/core/*.gz
       do
         ls -l $datafile
       done
     ```
-Display the number of lines in each data file using a similar loop.
+**Solution:** This bash script lists all the data-files in the folder `core` with `gz` extension.
+
+
+    ```{bash, eval=T}
+    for datafile in /mnt/mimiciv/1.0/core/*.gz
+      do
+        wc -l $datafile
+      done
+    ```
+
+**Solution:** The bash script above displays the number of lines in each data file.
 
 5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `sort`, `uniq`, `wc`, and so on.)
 
