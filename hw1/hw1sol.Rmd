@@ -67,7 +67,7 @@ ls -l /mnt/mimiciv/1.0/hosp
 ls -l /mnt/mimiciv/1.0/icu
 
 ```
-
+**Solution:** The 'gz' file uses the gzip compression technology, combining the files and reducing the overall size of the files. A GZ archive can be extracted using either built-in tools or other tools available online.
 
 3. Briefly describe what bash commands `zcat`, `zless`, `zmore`, and `zgrep` do.
 
