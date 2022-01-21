@@ -349,9 +349,16 @@ pre code {
 <pre class="bash"><code>wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
 for char in Elizabeth Jane Lydia Darcy
 do
-  echo $char:
-  # some commands here
-done</code></pre></li>
+  echo $char: |
+  wc -l
+done</code></pre>
+<pre><code>## File ‘pg42671.txt’ already there; not retrieving.
+## 
+## 1
+## 1
+## 1
+## 1</code></pre>
+<p><strong>Solution:</strong> The command <code>wget -nc</code></p></li>
 <li><p>What’s the difference between the following two commands?</p>
 <pre class="bash"><code>echo &#39;hello, world&#39; &gt; test1.txt</code></pre>
 <p>and</p>
