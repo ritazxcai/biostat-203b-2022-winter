@@ -32,6 +32,14 @@ sessionInfo()
 
 This exercise (and later in this course) uses the [MIMIC-IV data](https://mimic-iv.mit.edu), a freely accessible critical care database developed by the MIT Lab for Computational Physiology. Follow the instructions at <https://mimic.mit.edu/docs/gettingstarted/> to (1) complete the CITI `Data or Specimens Only Research` course and (2) obtain the PhysioNet credential for using the MIMIC-IV data. Display the verification links to your completion report and completion certificate here. (Hint: The CITI training takes a couple hours and the PhysioNet credentialing takes a couple days; do not leave it to the last minute.)
 
+
+**Solution:**
+Here is the link to my CITI course completion certificate: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/viewer.html?pdfurl=https%3A%2F%2Fwww.citiprogram.org%2Fverify%2F%3Fw28a5ae9d-612f-4324-8b1d-9793dac64b08-46697326.
+
+Here is the link to my PhysioNet credential:
+
+
+
 ## Q3. Linux Shell Commands
 
 1. The `/mnt/mimiciv/1.0` folder on teaching server contains data sets from MIMIC-IV. Refer to the documentation <https://mimic.mit.edu/docs/iv/> for details of data files.  
@@ -59,7 +67,6 @@ ls -l /mnt/mimiciv/1.0/hosp
 ls -l /mnt/mimiciv/1.0/icu
 
 ```
-
 
 
 3. Briefly describe what bash commands `zcat`, `zless`, `zmore`, and `zgrep` do.
