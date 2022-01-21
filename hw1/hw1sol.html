@@ -274,7 +274,10 @@ pre code {
 ## -rw-r--r--. 1 root root   20567368 Jan  4 21:52 procedureevents.csv.gz</code></pre>
 <p><strong>Solution:</strong> The ‘gz’ file uses the gzip compression technology, combining the files and reducing the overall size of the files. A GZ archive can be extracted using either built-in tools or other tools available online.</p>
 <ol start="3" style="list-style-type: decimal">
-<li><p>Briefly describe what bash commands <code>zcat</code>, <code>zless</code>, <code>zmore</code>, and <code>zgrep</code> do.</p></li>
+<li>Briefly describe what bash commands <code>zcat</code>, <code>zless</code>, <code>zmore</code>, and <code>zgrep</code> do.</li>
+</ol>
+<p><strong>Solution:</strong> The <code>zcat</code> command can display the contents of a gzipped file. It works with both compressed file and uncompressed. The <code>zless</code> and <code>zmore</code> commands are used to paginate the compressed file. The <code>zgrep</code> command is used to search inside the compressed file. The file would be uncompressed if needed and fed to the <code>grep</code> command. This command is especially useful for finding and displaying lines with specific features.</p>
+<ol start="4" style="list-style-type: decimal">
 <li><p>What’s the output of following bash script?</p>
 <pre class="bash"><code>for datafile in /mnt/mimiciv/1.0/core/*.gz
   do

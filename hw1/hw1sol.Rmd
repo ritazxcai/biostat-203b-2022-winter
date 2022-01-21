@@ -71,6 +71,12 @@ ls -l /mnt/mimiciv/1.0/icu
 
 3. Briefly describe what bash commands `zcat`, `zless`, `zmore`, and `zgrep` do.
 
+**Solution:**
+The `zcat` command can display the contents of a gzipped file. It works with both compressed file and uncompressed.
+The `zless` and `zmore` commands are used to paginate the compressed file.
+The `zgrep` command is used to search inside the compressed file. The file would be uncompressed if needed and fed to the `grep` command. This command is especially useful for finding and displaying lines with specific features.
+
+
 4. What's the output of following bash script?
     ```{bash, eval=F}
     for datafile in /mnt/mimiciv/1.0/core/*.gz
