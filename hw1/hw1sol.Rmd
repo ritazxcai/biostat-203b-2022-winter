@@ -86,7 +86,6 @@ The `zgrep` command is used to search inside the compressed file. The file would
     ```
 **Solution:** This bash script lists all the data-files in the folder `core` with `gz` extension.
 
-
     ```{bash, eval=T}
     for datafile in /mnt/mimiciv/1.0/core/*.gz
       do
@@ -97,6 +96,30 @@ The `zgrep` command is used to search inside the compressed file. The file would
 **Solution:** The bash script above displays the number of lines in each data file.
 
 5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `sort`, `uniq`, `wc`, and so on.)
+
+**Solution:**
+A total of 66155 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
+```{bash}
+wc -l /mnt/mimiciv/1.0/core/admissions.csv.gz
+
+
+```
+
+**Solution:**
+Display the first few lines (let's do 10 lines here) of `admissions.csv.gz`:
+```{bash}
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head -10
+
+```
+
+**Solution:**
+The following bash script counts the number of unique subject IDs. **Rationale:** From last part we know that each line contains fields separated by `,` and that the subject IDs are displayed in the first column. Thus, we use `awk` command to search and print only the first column. Next, we use the `uniq` command to display the unique lines in the sorted list of subject IDs. Finally, we use `wc` command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.
+```{bash}
+awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+
+
+```
+ 
 
 6. What are the possible values taken by each of the variable `admission_type`, `admission_location`, `insurance`, and `ethnicity`? Also report the count for each unique value of these variables. (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `uniq -c`, `wc`, and so on.)
 
