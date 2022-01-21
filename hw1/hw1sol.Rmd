@@ -158,15 +158,17 @@ awk -F, '{ print $12 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     ```
 Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git. Complete the following loop to tabulate the number of times each of the four characters is mentioned using Linux commands.
-    ```{bash, eval=TRUE}
+    ```{bash, eval=F}
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     for char in Elizabeth Jane Lydia Darcy
     do
-      echo $char: |
-      wc -l
+      echo $char: grep -o '$char' | wc -l
     done
     ```
-**Solution:** The command `wget -nc`
+
+
+
+**Solution:** `-nc` option stands for "no clobber", which means that the local file is not overwritten upon repeated download. In other words, when the option `-nc` is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk.
 
 
 2. What's the difference between the following two commands?
@@ -177,6 +179,9 @@ Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git
     ```{bash eval=FALSE}
     echo 'hello, world' >> test2.txt
     ```
+
+**Solution:** `>` is the standard redirect notation. Both commands would output the `'hello world'` message into the text file specified. The command with `>` notation would create or write over the text file "test1.txt", while the one with `>>` notation would only append this message to the text file "test2.txt".
+
 
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}

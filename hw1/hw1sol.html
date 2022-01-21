@@ -349,20 +349,18 @@ pre code {
 <pre class="bash"><code>wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
 for char in Elizabeth Jane Lydia Darcy
 do
-  echo $char: |
-  wc -l
-done</code></pre>
-<pre><code>## File ‘pg42671.txt’ already there; not retrieving.
-## 
-## 1
-## 1
-## 1
-## 1</code></pre>
-<p><strong>Solution:</strong> The command <code>wget -nc</code></p></li>
+  echo $char: grep -o &#39;$char&#39; | wc -l
+done</code></pre></li>
+</ol>
+<p><strong>Solution:</strong> <code>-nc</code> option stands for “no clobber”, which means that the local file is not overwritten upon repeated download. In other words, when the option <code>-nc</code> is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk.</p>
+<ol start="2" style="list-style-type: decimal">
 <li><p>What’s the difference between the following two commands?</p>
 <pre class="bash"><code>echo &#39;hello, world&#39; &gt; test1.txt</code></pre>
 <p>and</p>
 <pre class="bash"><code>echo &#39;hello, world&#39; &gt;&gt; test2.txt</code></pre></li>
+</ol>
+<p><strong>Solution:</strong> <code>&gt;</code> is the standard redirect notation. Both commands would output the <code>&#39;hello world&#39;</code> message into the text file specified. The command with <code>&gt;</code> notation would create or write over the text file “test1.txt”, while the one with <code>&gt;&gt;</code> notation would only append this message to the text file “test2.txt”.</p>
+<ol start="3" style="list-style-type: decimal">
 <li><p>Using your favorite text editor (e.g., <code>vi</code>), type the following and save the file as <code>middle.sh</code>:</p>
 <pre class="bash"><code>#!/bin/sh
 # Select lines from the middle of a file.
