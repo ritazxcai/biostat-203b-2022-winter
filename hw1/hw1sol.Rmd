@@ -36,7 +36,7 @@ This exercise (and later in this course) uses the [MIMIC-IV data](https://mimic-
 **Solution:**
 Here is the link to my CITI course completion certificate: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/viewer.html?pdfurl=https%3A%2F%2Fwww.citiprogram.org%2Fverify%2F%3Fw28a5ae9d-612f-4324-8b1d-9793dac64b08-46697326.
 
-Here is the link to my PhysioNet credential:
+My PhysioNet credential application was submitted on Jan 18th, 2022 and is still in the "pending" status. The link to this credential will be updated when available.
 
 
 
@@ -198,7 +198,7 @@ Using `chmod` make the file executable by the owner, and run
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Note:** To reproduce the result, change the path-name to locate `middle.sh` in your directory.
+**Note:** To reproduce the result in other server, change the path-name to locate `middle.sh` in your directory.
 
 **Solution:** 
 
