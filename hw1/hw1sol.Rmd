@@ -100,7 +100,7 @@ The `zgrep` command is used to search inside the compressed file. The file would
 **Solution:**
 A total of 66155 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
 ```{bash}
-wc -l /mnt/mimiciv/1.0/core/admissions.csv.gz
+awk 'END { print NR }' /mnt/mimiciv/1.0/core/admissions.csv.gz
 
 
 ```
@@ -108,14 +108,14 @@ wc -l /mnt/mimiciv/1.0/core/admissions.csv.gz
 **Solution:**
 Display the first few lines (let's do 10 lines here) of `admissions.csv.gz`:
 ```{bash}
-zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head -10
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head
 
 ```
 
 **Solution:**
 The following bash script counts the number of unique subject IDs. **Rationale:** From last part we know that each line contains fields separated by `,` and that the subject IDs are displayed in the first column. Thus, we use `awk` command to search and print only the first column. Next, we use the `uniq -u` command to display the unique lines in the sorted list of subject IDs. Finally, we use `wc` command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.
 ```{bash}
-awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
 
 ```
@@ -123,30 +123,32 @@ awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u 
 
 6. What are the possible values taken by each of the variable `admission_type`, `admission_location`, `insurance`, and `ethnicity`? Also report the count for each unique value of these variables. (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `uniq -c`, `wc`, and so on.)
 
-**Solution:** For `admission_type`, the count of unique values:
+
+**Solution:**
+For `admission_type`, the count of unique values:
 ```{bash}
-awk -F, '{ print $6 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+awk -F, '{ print $6 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
 ```
 
 
 For `admission_location`, the count of unique values:
 ```{bash}
-awk -F, '{ print $7 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+awk -F, '{ print $7 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
 ```
 
 
 For `insurance`, the count of unique values:
 ```{bash}
-awk -F, '{ print $9 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+awk -F, '{ print $9 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
 ```
 
 
 For `ethnicity`, the count of unique values:
 ```{bash}
-awk -F, '{ print $12 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u | wc -l
+awk -F, '{ print $12 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
 ```
 
@@ -158,15 +160,16 @@ awk -F, '{ print $12 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort | uniq -u
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     ```
 Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git. Complete the following loop to tabulate the number of times each of the four characters is mentioned using Linux commands.
-    ```{bash, eval=F}
+    ```{bash, eval=T}
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     for char in Elizabeth Jane Lydia Darcy
     do
       echo $char:
-      grep -o -i $char | wc -l
+      grep -o -i $char pg42671.txt | wc -l
     done
     ```
 
+**Note:** The bash script above takes too long to render. It produces the same result as the output of the bash script below:
 
 ```{bash}
 grep -o -i 'Elizabeth' pg42671.txt | wc -l
@@ -178,7 +181,7 @@ grep -o -i 'Darcy' pg42671.txt | wc -l
 ```
 
 
-**Solution:** `-nc` option stands for "no clobber", which means that the local file is not overwritten upon repeated download. In other words, when the option `-nc` is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk.
+**Solution:** `-nc` option stands for "no clobber", which means that the local file is not overwritten upon repeated download. In other words, when the option `-nc` is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk. From the bash script output we can see that Elizabeth was the most mentioned with a total of 634 times.
 
 
 2. What's the difference between the following two commands?
@@ -206,7 +209,7 @@ Using `chmod` make the file executable by the owner, and run
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Note:** To reproduce the result, change the path-name to locate `middle.sh`.
+**Note:** To reproduce the result, change the path-name to locate `middle.sh` in your directory.
 
 **Solution:** 
 
