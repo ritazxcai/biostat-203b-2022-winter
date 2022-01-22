@@ -98,7 +98,7 @@ The `zgrep` command is used to search inside the compressed file. The file would
 5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `sort`, `uniq`, `wc`, and so on.)
 
 **Solution:**
-A total of 66155 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
+A total of 66156 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
 ```{bash}
 awk 'END { print NR }' /mnt/mimiciv/1.0/core/admissions.csv.gz
 
