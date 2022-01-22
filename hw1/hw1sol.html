@@ -399,7 +399,7 @@ hostname
 arch
 uname -a
 uptime
-who am i
+whoami
 who
 w
 id
@@ -408,6 +408,7 @@ echo {con,pre}{sent,fer}{s,ed}
 time sleep 5
 history | tail
 </code></pre>
+<p><strong>Solution:</strong> The command <code>cal</code> gives the calendar of current month (For now, it’s Jan 2022). <code>cal 2021</code> gives the calendar of 2021. <code>cal 9 1752</code> gives the September calendar of 1752 (but dates between Sep 3rd and Sep 13th are omitted). <code>date</code>gives the day of the week, date, time and year at the exact moment the command is executed. <code>hostname</code> gives the name of the server; in this case, “biostat-203b-teaching-server”. <code>arch</code> gives the version of operating system of this local machine. <code>uname -a</code> prints all the system information. <code>uptime</code> command prints the length of time the system is active. <code>whoami</code> command gives the username of the current user when this command is invoked. <code>who</code> command displays the usernames of the current logged-in users. <code>w</code> command shows who are currently logged in and their activities. <code>id</code> command prints out the user, IDs, and group names of the users in the server. <code>last | head</code> gives the first few lines of a list of all the users logged in/out since the file /var/log/wtmp was created. <code>echo {con,pre}{sent,fer}{s,ed}</code> prints out all the combinations of prefixes, roots, and suffixes listed in the brackets. For <code>time sleep 5</code>, the <code>time</code> part of the command prints the summary of real-time, user cpu time and system cpu time spent by executing the command when it terminates; the <code>sleep 5</code> part of the command postpones the command that follows for 5 seconds. <code>history | tail</code> prints the mostly recently used commands.</p>
 </div>
 </div>
 
