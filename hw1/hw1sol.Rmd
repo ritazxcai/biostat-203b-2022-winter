@@ -162,10 +162,19 @@ Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     for char in Elizabeth Jane Lydia Darcy
     do
-      echo $char: grep -o '$char' | wc -l
+      grep -c '$char'
     done
     ```
 
+
+```{bash}
+grep -c 'Elizabeth' pg42671.txt
+grep -c 'Jane' pg42671.txt
+grep -c 'Lydia' pg42671.txt
+grep -c 'Darcy' pg42671.txt
+
+
+```
 
 
 **Solution:** `-nc` option stands for "no clobber", which means that the local file is not overwritten upon repeated download. In other words, when the option `-nc` is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk.
@@ -191,11 +200,37 @@ Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git
     head -n "$2" "$1" | tail -n "$3"
     ```
 Using `chmod` make the file executable by the owner, and run 
-    ```{bash eval=FALSE}
-    ./middle.sh pg42671.txt 20 5
+    ```{bash eval=T}
+    /home/ritazxcai/biostat-203b-2022-winter/middle.sh pg42671.txt 20 5
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
+
+**Note:** To reproduce the result, change the path-name to locate `middle.sh`.
+
+**Solution:** 
+
 
 ### Q5. More fun with Linux
 
 Try following commands in Bash and interpret the results: `cal`, `cal 2021`, `cal 9 1752` (anything unusual?), `date`, `hostname`, `arch`, `uname -a`, `uptime`, `who am i`, `who`, `w`, `id`, `last | head`, `echo {con,pre}{sent,fer}{s,ed}`, `time sleep 5`, `history | tail`.
+
+```{bash}
+cal
+cal 2021
+cal 9 1752
+date
+hostname
+arch
+uname -a
+uptime
+who am i
+who
+w
+id
+last | head
+echo {con,pre}{sent,fer}{s,ed}
+time sleep 5
+history | tail
+
+
+```
