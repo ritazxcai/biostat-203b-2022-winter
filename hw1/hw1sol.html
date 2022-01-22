@@ -316,7 +316,7 @@ pre code {
 ## 17301855,29732723,2140-06-06 14:23:00,2140-06-08 14:25:00,,ELECTIVE,,HOME,Other,ENGLISH,,WHITE,,,0
 ## 17991012,24298836,2181-07-10 20:28:00,2181-07-12 15:49:00,,ELECTIVE,,HOME,Other,ENGLISH,,WHITE,,,0
 ## 16865435,23216961,2185-07-19 02:12:00,2185-07-21 11:50:00,,ELECTIVE,,HOME,Other,ENGLISH,,WHITE,,,0</code></pre>
-<p><strong>Solution:</strong> The following bash script counts the number of unique subject IDs. <strong>Rationale:</strong> From last part we know that each line contains fields separated by <code>,</code> and that the subject IDs are displayed in the first column. Thus, we use <code>awk</code> command to search and print only the first column. Next, we use the <code>uniq -u</code> command to display the unique lines in the sorted list of subject IDs. Finally, we use <code>wc</code> command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.</p>
+<p><strong>Solution:</strong> The following bash script counts the number of unique subject IDs. <strong>Rationale:</strong> From last part we know that each line contains fields separated by <code>,</code> and that the subject IDs are displayed in the first column. Thus, I use <code>awk</code> command to search and print only the first column. Next, I use the <code>sort -u</code> command to sort and display the unique lines in the list of subject IDs. Finally, we use <code>wc</code> command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.</p>
 <pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 </code></pre>
 <pre><code>## 64871</code></pre>
@@ -363,16 +363,6 @@ done</code></pre>
 ## Darcy:
 ## 418</code></pre></li>
 </ol>
-<p><strong>Note:</strong> The bash script above takes too long to render. It produces the same result as the output of the bash script below:</p>
-<pre class="bash"><code>grep -o -i &#39;Elizabeth&#39; pg42671.txt | wc -l
-grep -o -i &#39;Jane&#39; pg42671.txt | wc -l
-grep -o -i &#39;Lydia&#39; pg42671.txt | wc -l
-grep -o -i &#39;Darcy&#39; pg42671.txt | wc -l
-</code></pre>
-<pre><code>## 634
-## 294
-## 171
-## 418</code></pre>
 <p><strong>Solution:</strong> <code>-nc</code> option stands for “no clobber”, which means that the local file is not overwritten upon repeated download. In other words, when the option <code>-nc</code> is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk. From the bash script output we can see that Elizabeth was the most mentioned with a total of 634 times.</p>
 <ol start="2" style="list-style-type: decimal">
 <li><p>What’s the difference between the following two commands?</p>

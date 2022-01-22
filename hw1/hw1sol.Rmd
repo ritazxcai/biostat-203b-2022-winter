@@ -113,7 +113,7 @@ zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head
 ```
 
 **Solution:**
-The following bash script counts the number of unique subject IDs. **Rationale:** From last part we know that each line contains fields separated by `,` and that the subject IDs are displayed in the first column. Thus, we use `awk` command to search and print only the first column. Next, we use the `uniq -u` command to display the unique lines in the sorted list of subject IDs. Finally, we use `wc` command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.
+The following bash script counts the number of unique subject IDs. **Rationale:** From last part we know that each line contains fields separated by `,` and that the subject IDs are displayed in the first column. Thus, I use `awk` command to search and print only the first column. Next, I use the `sort -u` command to sort and display the unique lines in the list of subject IDs. Finally, we use `wc` command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.
 ```{bash}
 awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 
@@ -168,17 +168,6 @@ Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git
       grep -o -i $char pg42671.txt | wc -l
     done
     ```
-
-**Note:** The bash script above takes too long to render. It produces the same result as the output of the bash script below:
-
-```{bash}
-grep -o -i 'Elizabeth' pg42671.txt | wc -l
-grep -o -i 'Jane' pg42671.txt | wc -l
-grep -o -i 'Lydia' pg42671.txt | wc -l
-grep -o -i 'Darcy' pg42671.txt | wc -l
-
-
-```
 
 
 **Solution:** `-nc` option stands for "no clobber", which means that the local file is not overwritten upon repeated download. In other words, when the option `-nc` is specified, the file from the url would not be retrieved from the world wide web; instead, it would be loaded from the local disk. From the bash script output we can see that Elizabeth was the most mentioned with a total of 634 times.
