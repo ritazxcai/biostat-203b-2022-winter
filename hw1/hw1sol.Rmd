@@ -162,16 +162,17 @@ Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git
     wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
     for char in Elizabeth Jane Lydia Darcy
     do
-      grep -c '$char'
+      echo $char:
+      grep -o -i $char | wc -l
     done
     ```
 
 
 ```{bash}
-grep -c 'Elizabeth' pg42671.txt
-grep -c 'Jane' pg42671.txt
-grep -c 'Lydia' pg42671.txt
-grep -c 'Darcy' pg42671.txt
+grep -o -i 'Elizabeth' pg42671.txt | wc -l
+grep -o -i 'Jane' pg42671.txt | wc -l
+grep -o -i 'Lydia' pg42671.txt | wc -l
+grep -o -i 'Darcy' pg42671.txt | wc -l
 
 
 ```
@@ -214,7 +215,7 @@ Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this sh
 
 Try following commands in Bash and interpret the results: `cal`, `cal 2021`, `cal 9 1752` (anything unusual?), `date`, `hostname`, `arch`, `uname -a`, `uptime`, `who am i`, `who`, `w`, `id`, `last | head`, `echo {con,pre}{sent,fer}{s,ed}`, `time sleep 5`, `history | tail`.
 
-```{bash}
+```{bash, eval = F}
 cal
 cal 2021
 cal 9 1752
