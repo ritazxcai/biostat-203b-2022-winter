@@ -200,7 +200,8 @@ Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this sh
 
 **Note:** To reproduce the result in other server, change the path-name to locate `middle.sh` in your directory.
 
-**Solution:** 
+**Solution:** The first line of the shell script, `#!/bin/sh`, tells the parent shell which interpreter to use to execute the script. `#!` indicates that it is a text script.
+In the `middle.sh` shell script, commands were written so that lines were selected from the middle of the text file named `pg42671.txt` with the end of lines being `20` and the number of lines being `5`. Here, `"$1"`, `"$2"`, and `"$3"` are positional arguments, with `"$1"` being `pg42671.txt`, `"$2"` being `20`, and `"$3"` being `5`.
 
 
 ### Q5. More fun with Linux
