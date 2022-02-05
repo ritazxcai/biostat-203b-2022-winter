@@ -313,9 +313,45 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 ##  [9] &quot;15914763,28906020,36909804,Trauma SICU (TSICU),Trauma SICU (TSICU),2176-12-14 12:00:00,2176-12-17 11:47:01,2.9909837962962964&quot; 
 ## [10] &quot;16256226,20013290,39289362,Neuro Stepdown,Neuro Stepdown,2150-12-20 16:09:08,2150-12-21 14:58:40,0.9510648148148149&quot;</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>Import <code>icustatys.csv.gz</code> as a tibble <code>icustays_tble</code>.</p></li>
-<li><p>How many unique <code>subject_id</code>? Can a <code>subject_id</code> have multiple ICU stays?</p></li>
-<li><p>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</p></li>
+<li>Import <code>icustatys.csv.gz</code> as a tibble <code>icustays_tble</code>.</li>
+</ol>
+<p><strong>Solution:</strong></p>
+<pre class="r"><code>system(
+  str_c(
+    &quot;zcat &lt; &quot;, 
+    shQuote(str_c(mimic_path, &quot;/icu/icustays.csv.gz&quot;)), 
+    &quot; | head&quot;
+    ), 
+  intern = TRUE
+) %&gt;%
+  as_tibble()</code></pre>
+<pre><code>## # A tibble: 10 × 1
+##    value                                                                        
+##    &lt;chr&gt;                                                                        
+##  1 subject_id,hadm_id,stay_id,first_careunit,last_careunit,intime,outtime,los   
+##  2 17867402,24528534,31793211,Trauma SICU (TSICU),Trauma SICU (TSICU),2154-03-0…
+##  3 14435996,28960964,31983544,Trauma SICU (TSICU),Trauma SICU (TSICU),2150-06-1…
+##  4 17609946,27385897,33183475,Trauma SICU (TSICU),Trauma SICU (TSICU),2138-02-0…
+##  5 18966770,23483021,34131444,Trauma SICU (TSICU),Trauma SICU (TSICU),2123-10-2…
+##  6 12776735,20817525,34547665,Neuro Stepdown,Neuro Stepdown,2200-07-12 00:33:00…
+##  7 10215159,24283593,34569476,Trauma SICU (TSICU),Trauma SICU (TSICU),2124-09-2…
+##  8 14489052,26516390,35056286,Trauma SICU (TSICU),Trauma SICU (TSICU),2118-10-2…
+##  9 15914763,28906020,36909804,Trauma SICU (TSICU),Trauma SICU (TSICU),2176-12-1…
+## 10 16256226,20013290,39289362,Neuro Stepdown,Neuro Stepdown,2150-12-20 16:09:08…</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>How many unique <code>subject_id</code>? Can a <code>subject_id</code> have multiple ICU stays?</li>
+</ol>
+<p><strong>Solution:</strong></p>
+<pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/icu/icustays.csv.gz | sort -u | wc -l
+</code></pre>
+<pre><code>## 11229</code></pre>
+<p>There are a total of 11229 unique subject IDs in the <code>icustays.csv.gz</code> file.</p>
+<pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/icu/icustays.csv.gz | wc -l
+</code></pre>
+<pre><code>## 11414</code></pre>
+<p>There can be multiple ICU stays for the same subject ID. If unique subject IDs are not sorted out, the total number of IDs are greater, meaning that multiple stays were recorded for some individuals.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</li>
 </ol>
 </div>
 <div id="q3.-admission-data" class="section level2">
