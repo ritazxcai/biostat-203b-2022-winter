@@ -44,9 +44,29 @@ Which function is fastest? Is there difference in the (default) parsed data type
 
 For later questions, we stick to the tidyverse. 
 
-
 **Solution:** 
+```{r, eval=F}
+  read_csv(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
 
+```
+
+```{r}
+  system.time({read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
+
+```
+
+```{r, eval=F}
+  fread(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
+
+```
+
+```{r}
+  system.time({fread(str_c(mimic_path, "/core/admissions.csv.gz"))})
+
+```
+The fastest method is the `fread` by data.table package in R.
 
 
 ## Q2. ICU stays
