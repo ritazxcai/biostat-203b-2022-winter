@@ -104,13 +104,13 @@ system(
 zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, '{ print $1 }' | sort -u | wc -l
 
 ```
-There are a total of 11229 unique subject IDs in the `icustays.csv.gz` file.
+There are a total of 53151 unique subject IDs in the `icustays.csv.gz` file.
 
 ```{bash}
 zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, '{ print $1 }' | wc -l
 
 ```
-There can be multiple ICU stays for the same subject ID. If unique subject IDs are not sorted out, the total number of IDs are greater, meaning that multiple stays were recorded for some individuals.
+There can be multiple ICU stays for the same subject ID. If unique subject IDs are not sorted out, the total number of IDs are greater (=76541), meaning that multiple stays were recorded for some individuals.
 
 
 3. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`.
