@@ -111,7 +111,19 @@ There can be multiple ICU stays for the same subject ID. If unique subject IDs a
 
 3. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`.
 
+**Solution:**
 ```{r, eval=T}
+icustays_tble %>%
+  arrange(icustays_tble, desc(subject_id)) %>%
+  group_by(subject_id) %>%
+  slice_min(order_by = intime) %>%
+  print(width = Inf)
+
+```
+
+
+**This only extracts the unique subjects but not necessarily with the first ICU visits:**
+```{r, eval=F}
 icustays_tble
 distinct(icustays_tble, subject_id, .keep_all = TRUE) %>%
 print(width = Inf)
@@ -159,6 +171,16 @@ admissions_tble
 - admission month day  
 - admission week day  
 - admission hour (anything unusual?)  
+
+**Solution:**
+```{r}
+
+
+
+
+
+```
+
 
 ## Q4. `patients` data
 
