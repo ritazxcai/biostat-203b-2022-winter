@@ -185,17 +185,15 @@ admissions_tble
 **Solution:**
 ```{r, eval=F}
 library(lubridate)
-admissions_tble %>%
-  mutate(datetime = ymd_hms("admittime") %>%
-  mutate(
+datetime <- ymd_hms(admissions_tble, "admittime")
+mutate(admissions_tble,
     admission_year = year(datetime),
     admission_month = month(datetime),
     admission_month_day = mday(datetime),
     admission_week_day = wday(datetime),
     admission_hour = hour(datetime)
   ) %>%
-  summarise()
-
+  print(width = Inf)
 
 ```
 
@@ -216,7 +214,24 @@ system(
 
 1. Import `patients.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/core/patients/>) as a tibble `patients_tble` and only keep the patients who have a match in `icustays_tble` (according to `subject_id`).
 
+**Solution:**
+```{r}
+  patients <- read_csv(str_c(mimic_path, "/core/patients.csv.gz"))
+  patients_tble <- as_tibble(patients)
+
+```
+
+```{r}
+  semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  print(width = Inf)
+
+
+```
+
 2. Summarize variables `gender` and `anchor_age`, and explain any patterns you see.
+
+**Solution:**
+
 
 ## Q5. Lab results
 
