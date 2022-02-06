@@ -88,14 +88,9 @@ system(
 
 **Solution:**
 ```{r}
-icustays <- system(
-  str_c(
-    "zcat < ", 
-    shQuote(str_c(mimic_path, "/icu/icustays.csv.gz"))
-    ), 
-  intern = TRUE
-)
-icustays_tble <-  as_tibble(icustays)
+icustays <- read_csv(str_c(mimic_path, "/icu/icustays.csv.gz"))
+icustays_tble <- as_tibble(icustays)
+
 icustays_tble
 ```
 2. How many unique `subject_id`? Can a `subject_id` have multiple ICU stays? 
@@ -118,7 +113,7 @@ There can be multiple ICU stays for the same subject ID. If unique subject IDs a
 
 ```{r, eval=T}
 icustays_tble
-distinct(icustays.tble, subject_id, .keep_all = TRUE)
+distinct(icustays_tble, subject_id, .keep_all = TRUE) %>%
 print(width = Inf)
 
 ```
@@ -138,7 +133,25 @@ system(
 
 1. Import `admissions.csv.gz` as a tibble `admissions_tble`.
 
+```{r}
+admissions <- read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))
+admissions_tble <- as_tibble(admissions)
+
+admissions_tble
+```
+
+
+
 2. Let's only keep the admissions that have a match in `icustays_tble` according to `subject_id` and `hadmi_id`.
+
+```{r}
+
+
+
+
+```
+
+
 
 3. Summarize the following variables by graphics. 
 
