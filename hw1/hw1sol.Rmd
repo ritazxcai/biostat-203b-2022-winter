@@ -98,9 +98,9 @@ The `zgrep` command is used to search inside the compressed file. The file would
 5. Display the first few lines of `admissions.csv.gz`. How many rows are in this data file? How many unique patients (identified by `subject_id`) are in this data file? (Hint: combine Linux commands `zcat`, `head`/`tail`, `awk`, `sort`, `uniq`, `wc`, and so on.)
 
 **Solution:**
-A total of 66156 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
+A total of 523741 rows are in `admissions.csv.gz`. The bash script below displays the number of rows in `admissions.csv.gz`:
 ```{bash}
-awk 'END { print NR }' /mnt/mimiciv/1.0/core/admissions.csv.gz
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk 'END { print NR }'
 
 
 ```
@@ -115,7 +115,7 @@ zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head
 **Solution:**
 The following bash script counts the number of unique subject IDs. **Rationale:** From last part we know that each line contains fields separated by `,` and that the subject IDs are displayed in the first column. Thus, I use `awk` command to search and print only the first column. Next, I use the `sort -u` command to sort and display the unique lines in the list of subject IDs. Finally, we use `wc` command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.
 ```{bash}
-awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, '{ print $1 }'| sort -u | wc -l
 
 
 ```
@@ -127,28 +127,28 @@ awk -F, '{ print $1 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
 **Solution:**
 For `admission_type`, the count of unique values:
 ```{bash}
-awk -F, '{ print $6 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, '{ print $6 }' | sort -u | wc -l
 
 ```
 
 
 For `admission_location`, the count of unique values:
 ```{bash}
-awk -F, '{ print $7 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, '{ print $7 }'| sort -u | wc -l
 
 ```
 
 
 For `insurance`, the count of unique values:
 ```{bash}
-awk -F, '{ print $9 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, '{ print $9 }' | sort -u | wc -l
 
 ```
 
 
 For `ethnicity`, the count of unique values:
 ```{bash}
-awk -F, '{ print $12 }' /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, '{ print $12 }' | sort -u | wc -l
 
 ```
 

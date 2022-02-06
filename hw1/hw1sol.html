@@ -193,10 +193,11 @@ pre code {
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] digest_0.6.29   R6_2.5.1        jsonlite_1.7.2  magrittr_2.0.1 
-##  [5] evaluate_0.14   rlang_0.4.12    stringi_1.7.6   jquerylib_0.1.4
-##  [9] bslib_0.3.1     rmarkdown_2.11  tools_3.6.0     stringr_1.4.0  
-## [13] xfun_0.29       yaml_2.2.1      fastmap_1.1.0   compiler_3.6.0 
-## [17] htmltools_0.5.2 knitr_1.37      sass_0.4.0</code></pre>
+##  [5] evaluate_0.14   stringi_1.7.6   rlang_1.0.1     cli_3.1.0      
+##  [9] rstudioapi_0.13 jquerylib_0.1.4 bslib_0.3.1     rmarkdown_2.11 
+## [13] tools_3.6.0     stringr_1.4.0   xfun_0.29       yaml_2.2.1     
+## [17] fastmap_1.1.0   compiler_3.6.0  htmltools_0.5.2 knitr_1.37     
+## [21] sass_0.4.0</code></pre>
 <div id="q1.-gitgithub" class="section level2">
 <h2>Q1. Git/GitHub</h2>
 <p><strong>No handwritten homework reports are accepted for this course.</strong> We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.</p>
@@ -221,8 +222,8 @@ pre code {
 <pre class="bash"><code>ls -l /mnt/mimiciv/1.0</code></pre>
 <pre><code>## total 24
 ## drwxr-xr-x. 2 root root 4096 Jan  4 21:48 core
-## drwxr-xr-x. 2 root root 4096 Jan  4 21:51 hosp
-## drwxr-xr-x. 2 root root 4096 Jan  4 21:52 icu
+## drwxr-xr-x. 2 root root 4096 Jan 28 02:58 hosp
+## drwxr-xr-x. 2 root root 4096 Jan 28 03:49 icu
 ## -rw-r--r--. 1 root root  797 Jan  4 21:48 index.html
 ## -rw-r--r--. 1 root root 2518 Jan  4 21:54 LICENSE.txt
 ## -rw-r--r--. 1 root root 2459 Jan  4 21:48 SHA256SUMS.txt</code></pre>
@@ -241,37 +242,39 @@ pre code {
 <p><strong>Solution:</strong> Content of the folder <code>hosp</code> is</p>
 <pre class="bash"><code>ls -l /mnt/mimiciv/1.0/hosp
 </code></pre>
-<pre><code>## total 4454012
-## -rw-r--r--. 1 root root     430049 Jan  4 21:51 d_hcpcs.csv.gz
-## -rw-r--r--. 1 root root   29531152 Jan  4 21:48 diagnoses_icd.csv.gz
-## -rw-r--r--. 1 root root     863239 Jan  4 21:48 d_icd_diagnoses.csv.gz
-## -rw-r--r--. 1 root root     579998 Jan  4 21:48 d_icd_procedures.csv.gz
-## -rw-r--r--. 1 root root      14898 Jan  4 21:48 d_labitems.csv.gz
-## -rw-r--r--. 1 root root   11684062 Jan  4 21:51 drgcodes.csv.gz
-## -rw-r--r--. 1 root root  515763427 Jan  4 21:51 emar.csv.gz
-## -rw-r--r--. 1 root root  476252563 Jan  4 21:48 emar_detail.csv.gz
-## -rw-r--r--. 1 root root    2098831 Jan  4 21:51 hcpcsevents.csv.gz
-## -rw-r--r--. 1 root root       2325 Jan  4 21:48 index.html
-## -rw-r--r--. 1 root root 2091865786 Jan  4 21:50 labevents.csv.gz
-## -rw-r--r--. 1 root root   99133381 Jan  4 21:48 microbiologyevents.csv.gz
-## -rw-r--r--. 1 root root  422874088 Jan  4 21:48 pharmacy.csv.gz
-## -rw-r--r--. 1 root root  501381155 Jan  4 21:51 poe.csv.gz
-## -rw-r--r--. 1 root root   24020923 Jan  4 21:48 poe_detail.csv.gz
-## -rw-r--r--. 1 root root  367041717 Jan  4 21:49 prescriptions.csv.gz
-## -rw-r--r--. 1 root root    7750325 Jan  4 21:48 procedures_icd.csv.gz
-## -rw-r--r--. 1 root root    9565293 Jan  4 21:48 services.csv.gz</code></pre>
+<pre><code>## total 4621616
+## -rw-r--r--. 1 root    root        430049 Jan  4 21:51 d_hcpcs.csv.gz
+## -rw-r--r--. 1 root    root      29531152 Jan  4 21:48 diagnoses_icd.csv.gz
+## -rw-r--r--. 1 root    root        863239 Jan  4 21:48 d_icd_diagnoses.csv.gz
+## -rw-r--r--. 1 root    root        579998 Jan  4 21:48 d_icd_procedures.csv.gz
+## -rw-r--r--. 1 root    root         14898 Jan  4 21:48 d_labitems.csv.gz
+## -rw-r--r--. 1 root    root      11684062 Jan  4 21:51 drgcodes.csv.gz
+## -rw-r--r--. 1 root    root     515763427 Jan  4 21:51 emar.csv.gz
+## -rw-r--r--. 1 root    root     476252563 Jan  4 21:48 emar_detail.csv.gz
+## -rw-r--r--. 1 root    root       2098831 Jan  4 21:51 hcpcsevents.csv.gz
+## -rw-r--r--. 1 root    root          2325 Jan  4 21:48 index.html
+## -rw-r--r--. 1 root    root    2091865786 Jan  4 21:50 labevents.csv.gz
+## -rw-r--r--  1 huazhou huazhou  171624288 Jan 28 02:57 labevents_filtered_itemid.csv.gz
+## -rw-r--r--. 1 root    root      99133381 Jan  4 21:48 microbiologyevents.csv.gz
+## -rw-r--r--. 1 root    root     422874088 Jan  4 21:48 pharmacy.csv.gz
+## -rw-r--r--. 1 root    root     501381155 Jan  4 21:51 poe.csv.gz
+## -rw-r--r--. 1 root    root      24020923 Jan  4 21:48 poe_detail.csv.gz
+## -rw-r--r--. 1 root    root     367041717 Jan  4 21:49 prescriptions.csv.gz
+## -rw-r--r--. 1 root    root       7750325 Jan  4 21:48 procedures_icd.csv.gz
+## -rw-r--r--. 1 root    root       9565293 Jan  4 21:48 services.csv.gz</code></pre>
 <p><strong>Solution:</strong> Content of the folder <code>icu</code> is</p>
 <pre class="bash"><code>ls -l /mnt/mimiciv/1.0/icu
 </code></pre>
-<pre><code>## total 2741332
-## -rw-r--r--. 1 root root 2350783547 Jan  4 21:54 chartevents.csv.gz
-## -rw-r--r--. 1 root root   43296273 Jan  4 21:52 datetimeevents.csv.gz
-## -rw-r--r--. 1 root root      55917 Jan  4 21:52 d_items.csv.gz
-## -rw-r--r--. 1 root root    2848628 Jan  4 21:52 icustays.csv.gz
-## -rw-r--r--. 1 root root       1103 Jan  4 21:52 index.html
-## -rw-r--r--. 1 root root  352443512 Jan  4 21:52 inputevents.csv.gz
-## -rw-r--r--. 1 root root   37095672 Jan  4 21:52 outputevents.csv.gz
-## -rw-r--r--. 1 root root   20567368 Jan  4 21:52 procedureevents.csv.gz</code></pre>
+<pre><code>## total 2849020
+## -rw-r--r--. 1 root    root    2350783547 Jan  4 21:54 chartevents.csv.gz
+## -rw-r--r--  1 huazhou huazhou  110272408 Jan 28 03:49 chartevents_filtered_itemid.csv.gz
+## -rw-r--r--. 1 root    root      43296273 Jan  4 21:52 datetimeevents.csv.gz
+## -rw-r--r--. 1 root    root         55917 Jan  4 21:52 d_items.csv.gz
+## -rw-r--r--. 1 root    root       2848628 Jan  4 21:52 icustays.csv.gz
+## -rw-r--r--. 1 root    root          1103 Jan  4 21:52 index.html
+## -rw-r--r--. 1 root    root     352443512 Jan  4 21:52 inputevents.csv.gz
+## -rw-r--r--. 1 root    root      37095672 Jan  4 21:52 outputevents.csv.gz
+## -rw-r--r--. 1 root    root      20567368 Jan  4 21:52 procedureevents.csv.gz</code></pre>
 <p><strong>Solution:</strong> The ‘gz’ file uses the gzip compression technology, combining the files and reducing the overall size of the files. A GZ archive can be extracted using either built-in tools or other tools available online.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Briefly describe what bash commands <code>zcat</code>, <code>zless</code>, <code>zmore</code>, and <code>zgrep</code> do.</li>
@@ -299,10 +302,10 @@ pre code {
 <ol start="5" style="list-style-type: decimal">
 <li>Display the first few lines of <code>admissions.csv.gz</code>. How many rows are in this data file? How many unique patients (identified by <code>subject_id</code>) are in this data file? (Hint: combine Linux commands <code>zcat</code>, <code>head</code>/<code>tail</code>, <code>awk</code>, <code>sort</code>, <code>uniq</code>, <code>wc</code>, and so on.)</li>
 </ol>
-<p><strong>Solution:</strong> A total of 66156 rows are in <code>admissions.csv.gz</code>. The bash script below displays the number of rows in <code>admissions.csv.gz</code>:</p>
-<pre class="bash"><code>awk &#39;END { print NR }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz
+<p><strong>Solution:</strong> A total of 523741 rows are in <code>admissions.csv.gz</code>. The bash script below displays the number of rows in <code>admissions.csv.gz</code>:</p>
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk &#39;END { print NR }&#39;
 </code></pre>
-<pre><code>## 66156</code></pre>
+<pre><code>## 523741</code></pre>
 <p><strong>Solution:</strong> Display the first few lines (let’s do 10 lines here) of <code>admissions.csv.gz</code>:</p>
 <pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | head
 </code></pre>
@@ -317,28 +320,28 @@ pre code {
 ## 17991012,24298836,2181-07-10 20:28:00,2181-07-12 15:49:00,,ELECTIVE,,HOME,Other,ENGLISH,,WHITE,,,0
 ## 16865435,23216961,2185-07-19 02:12:00,2185-07-21 11:50:00,,ELECTIVE,,HOME,Other,ENGLISH,,WHITE,,,0</code></pre>
 <p><strong>Solution:</strong> The following bash script counts the number of unique subject IDs. <strong>Rationale:</strong> From last part we know that each line contains fields separated by <code>,</code> and that the subject IDs are displayed in the first column. Thus, I use <code>awk</code> command to search and print only the first column. Next, I use the <code>sort -u</code> command to sort and display the unique lines in the list of subject IDs. Finally, we use <code>wc</code> command to count the number of lines in the list, which corresponds to the number of unique subject IDs in this file.</p>
-<pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, &#39;{ print $1 }&#39;| sort -u | wc -l
 </code></pre>
-<pre><code>## 64871</code></pre>
+<pre><code>## 256879</code></pre>
 <ol start="6" style="list-style-type: decimal">
 <li>What are the possible values taken by each of the variable <code>admission_type</code>, <code>admission_location</code>, <code>insurance</code>, and <code>ethnicity</code>? Also report the count for each unique value of these variables. (Hint: combine Linux commands <code>zcat</code>, <code>head</code>/<code>tail</code>, <code>awk</code>, <code>uniq -c</code>, <code>wc</code>, and so on.)</li>
 </ol>
 <p><strong>Solution:</strong> For <code>admission_type</code>, the count of unique values:</p>
-<pre class="bash"><code>awk -F, &#39;{ print $6 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, &#39;{ print $6 }&#39; | sort -u | wc -l
 </code></pre>
-<pre><code>## 2385</code></pre>
+<pre><code>## 10</code></pre>
 <p>For <code>admission_location</code>, the count of unique values:</p>
-<pre class="bash"><code>awk -F, &#39;{ print $7 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, &#39;{ print $7 }&#39;| sort -u | wc -l
 </code></pre>
-<pre><code>## 1219</code></pre>
+<pre><code>## 13</code></pre>
 <p>For <code>insurance</code>, the count of unique values:</p>
-<pre class="bash"><code>awk -F, &#39;{ print $9 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, &#39;{ print $9 }&#39; | sort -u | wc -l
 </code></pre>
-<pre><code>## 323</code></pre>
+<pre><code>## 4</code></pre>
 <p>For <code>ethnicity</code>, the count of unique values:</p>
-<pre class="bash"><code>awk -F, &#39;{ print $12 }&#39; /mnt/mimiciv/1.0/core/admissions.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/core/admissions.csv.gz | awk -F, &#39;{ print $12 }&#39; | sort -u | wc -l
 </code></pre>
-<pre><code>## 63</code></pre>
+<pre><code>## 9</code></pre>
 </div>
 <div id="q4.-whos-popular-in-price-and-prejudice" class="section level2">
 <h2>Q4. Who’s popular in Price and Prejudice</h2>
