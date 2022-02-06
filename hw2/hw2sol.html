@@ -706,7 +706,7 @@ mutate(admissions_tble,
 <li><p>We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of <code>labevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>labevents_tble</code>.</p>
 <p>Hint: <code>labevents.csv.gz</code> is a data file too big to be read in by the <code>read_csv</code> function in its default setting. Utilize the <code>col_select</code> and <code>lazy</code> options in the <code>read_csv</code> function to reduce the memory burden.</p></li>
 </ol>
-<p><strong>Solution:</strong> First, I used the directory to create a list of the 10 items we want.</p>
+<p><strong>Solution:</strong> First, I used the lab item directory to create a list of the 10 items we want.</p>
 <pre class="r"><code>dlabitems_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/d_labitems.csv.gz&quot;),
       col_select = c(itemid),
       col_types = cols_only(itemid = col_double())) %&gt;%
@@ -785,7 +785,32 @@ print(width = Inf)</code></pre>
 ##  [9] &quot;220052,Arterial Blood Pressure mean,ABPm,chartevents,Routine Vital Signs,mmHg,Numeric,,&quot;         
 ## [10] &quot;220056,Arterial Blood Pressure Alarm - Low,ABP Alarm - Low,chartevents,Alarms,mmHg,Numeric,,&quot;</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</p></li>
+<li>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</li>
+</ol>
+<p><strong>Solution:</strong> First, I used the item directory to create a list of the 5 items we want:</p>
+<pre class="r"><code>ditems_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/d_items.csv.gz&quot;),
+      col_select = c(itemid),
+      col_types = cols_only(itemid = col_double())) %&gt;%
+filter(itemid == 220045 |
+       itemid == 220181 |
+       itemid == 220179 |
+       itemid == 223761 |
+       itemid == 220210) %&gt;%
+print(width = Inf)</code></pre>
+<p>Checking the list of items we want:</p>
+<pre class="r"><code>ditems_tble$itemid</code></pre>
+<p><strong>Note:</strong> This takes very long to run.</p>
+<pre class="r"><code>labevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/chartevents.csv.gz&quot;),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% ditems_tble$itemid) %&gt;%
+  print(width = Inf)</code></pre>
+<ol start="2" style="list-style-type: decimal">
 <li><p>Further restrict <code>chartevents_tble</code> to the first vital measurement during the ICU stay.</p></li>
 <li><p>Summarize these vital measurements by appropriate numerics and graphics.</p></li>
 </ol>

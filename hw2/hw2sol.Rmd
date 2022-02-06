@@ -289,7 +289,7 @@ zcat /mnt/mimiciv/1.0/hosp/labevents.csv.gz | awk 'END { print NR }'
     Hint: `labevents.csv.gz` is a data file too big to be read in by the `read_csv` function in its default setting. Utilize the `col_select` and `lazy` options in the `read_csv` function to reduce the memory burden.
 
 **Solution:**
-First, I used the directory to create a list of the 10 items we want.
+First, I used the lab item directory to create a list of the 10 items we want.
 ```{r, eval=F}
 dlabitems_tble <- read_csv(str_c(mimic_path, "/hosp/d_labitems.csv.gz"),
       col_select = c(itemid),
@@ -342,6 +342,10 @@ labevents_tble %>%
 ```
 4. Summarize the lab measurements by appropriate numerics and graphics. 
 
+
+
+
+
 ## Q6. Vitals from charted events
 
 `chartevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `itemid` variable indicates a single measurement type in the database. The `value` variable is the value measured for `itemid`. The first 10 lines of `chartevents.csv.gz` are
@@ -366,6 +370,47 @@ system(
 ```
 
 1. We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of `chartevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `chartevents_tble`.
+
+**Solution:**
+First, I used the item directory to create a list of the 5 items we want:
+```{r, eval=F}
+ditems_tble <- read_csv(str_c(mimic_path, "/icu/d_items.csv.gz"),
+      col_select = c(itemid),
+      col_types = cols_only(itemid = col_double())) %>%
+filter(itemid == 220045 |
+       itemid == 220181 |
+       itemid == 220179 |
+       itemid == 223761 |
+       itemid == 220210) %>%
+print(width = Inf)
+
+
+```
+
+Checking the list of items we want:
+```{r, eval=F}
+ditems_tble$itemid
+
+```
+
+
+**Note:** This takes very long to run.
+```{r, eval=F}
+labevents_tble <- read_csv(str_c(mimic_path, "/icu/chartevents.csv.gz"),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% ditems_tble$itemid) %>%
+  print(width = Inf)
+
+
+```
+
+
 
 2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay. 
 
