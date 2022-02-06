@@ -355,7 +355,11 @@ icustays_tble</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</li>
 </ol>
-<pre class="r"><code>  distinct(icustays_tble, subject_id, .keep_all = TRUE)</code></pre>
+<pre class="r"><code>icustays_tble
+  icustays_tble %&gt;%
+  arrange(desc(subject_id)) %&gt;%
+  distinct(subject_id, .keep_all = TRUE) %&gt;%
+  print(width = Inf)</code></pre>
 </div>
 <div id="q3.-admission-data" class="section level2">
 <h2>Q3. <code>admission</code> data</h2>

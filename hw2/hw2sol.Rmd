@@ -13,7 +13,7 @@ Display machine information for reproducibility:
 sessionInfo()
 ```
 
-```{r setup, message=F}
+```{r setup, message=T}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE, cache.lazy = FALSE)
 library(tidyverse)
 library(data.table)
@@ -91,8 +91,7 @@ system(
 icustays <- system(
   str_c(
     "zcat < ", 
-    shQuote(str_c(mimic_path, "/icu/icustays.csv.gz")), 
-    " | head"
+    shQuote(str_c(mimic_path, "/icu/icustays.csv.gz"))
     ), 
   intern = TRUE
 )
@@ -117,9 +116,10 @@ There can be multiple ICU stays for the same subject ID. If unique subject IDs a
 
 3. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`.
 
-```{r, eval=F}
-  distinct(icustays_tble, subject_id, .keep_all = TRUE)
-
+```{r, eval=T}
+icustays_tble
+distinct(icustays.tble, subject_id, .keep_all = TRUE)
+print(width = Inf)
 
 ```
 ## Q3. `admission` data
