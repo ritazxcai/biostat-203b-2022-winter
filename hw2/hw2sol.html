@@ -342,13 +342,13 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 <li>How many unique <code>subject_id</code>? Can a <code>subject_id</code> have multiple ICU stays?</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/icu/icustays.csv.gz | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, &#39;{ print $1 }&#39; | sort -u | wc -l
 </code></pre>
-<pre><code>## 11229</code></pre>
+<pre><code>## 53151</code></pre>
 <p>There are a total of 11229 unique subject IDs in the <code>icustays.csv.gz</code> file.</p>
-<pre class="bash"><code>awk -F, &#39;{ print $1 }&#39; /mnt/mimiciv/1.0/icu/icustays.csv.gz | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, &#39;{ print $1 }&#39; | wc -l
 </code></pre>
-<pre><code>## 11414</code></pre>
+<pre><code>## 76541</code></pre>
 <p>There can be multiple ICU stays for the same subject ID. If unique subject IDs are not sorted out, the total number of IDs are greater, meaning that multiple stays were recorded for some individuals.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</li>
