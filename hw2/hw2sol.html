@@ -614,23 +614,22 @@ mutate(admissions_tble,
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>  patients_tble &lt;- as_tibble(patients)</code></pre>
-<pre class="r"><code>patients_tble %&gt;%
-  semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
+<pre class="r"><code>semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
   print(width = Inf)</code></pre>
-<pre><code>## # A tibble: 382,278 × 6
-##    subject_id gender anchor_age anchor_year anchor_year_group dod   
-##         &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;             &lt;date&gt;
-##  1   10000048 F              23        2126 2008 - 2010       NA    
-##  2   10002723 F               0        2128 2017 - 2019       NA    
-##  3   10003939 M               0        2184 2008 - 2010       NA    
-##  4   10004222 M               0        2161 2014 - 2016       NA    
-##  5   10005325 F               0        2154 2011 - 2013       NA    
-##  6   10007338 F               0        2153 2017 - 2019       NA    
-##  7   10008101 M               0        2142 2008 - 2010       NA    
-##  8   10009872 F               0        2168 2014 - 2016       NA    
-##  9   10011333 F               0        2132 2014 - 2016       NA    
-## 10   10011879 M               0        2158 2014 - 2016       NA    
-## # … with 382,268 more rows</code></pre>
+<pre><code>## # A tibble: 53,150 × 6
+##    subject_id gender anchor_age anchor_year anchor_year_group dod       
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;             &lt;date&gt;    
+##  1   10018928 F              31        2125 2008 - 2010       NA        
+##  2   10076543 F              78        2187 2008 - 2010       NA        
+##  3   10098428 F              85        2119 2008 - 2010       NA        
+##  4   10127185 M              60        2141 2008 - 2010       NA        
+##  5   10148710 M              67        2137 2008 - 2010       NA        
+##  6   10156486 F              75        2124 2017 - 2019       NA        
+##  7   10159585 M              59        2146 2008 - 2010       2154-04-16
+##  8   10171525 F              27        2115 2014 - 2016       NA        
+##  9   10196360 M              57        2118 2011 - 2013       NA        
+## 10   10227823 M              45        2156 2014 - 2016       NA        
+## # … with 53,140 more rows</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Summarize variables <code>gender</code> and <code>anchor_age</code>, and explain any patterns you see.</li>
 </ol>
@@ -647,13 +646,15 @@ mutate(admissions_tble,
 <pre class="r"><code>semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
   group_by(gender) %&gt;%
   summarise(mean_anchor_age = mean(anchor_age),
-            sd_anchor_age = sd(anchor_age))</code></pre>
-<pre><code>## # A tibble: 2 × 3
-##   gender mean_anchor_age sd_anchor_age
-##   &lt;chr&gt;            &lt;dbl&gt;         &lt;dbl&gt;
-## 1 F                 64.8          17.9
-## 2 M                 62.5          16.6</code></pre>
-<p>Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects.</p>
+            sd_anchor_age = sd(anchor_age),
+            min = min(anchor_age),
+            max = max(anchor_age))</code></pre>
+<pre><code>## # A tibble: 2 × 5
+##   gender mean_anchor_age sd_anchor_age   min   max
+##   &lt;chr&gt;            &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 F                 64.8          17.9    18    91
+## 2 M                 62.5          16.6    18    91</code></pre>
+<p>Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects. Both genders have a minimum anchor age of 18 and maximum anchor age of 91.</p>
 </div>
 <div id="q5.-lab-results" class="section level2">
 <h2>Q5. Lab results</h2>
@@ -704,8 +705,30 @@ mutate(admissions_tble,
 <ol start="2" style="list-style-type: decimal">
 <li><p>We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of <code>labevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>labevents_tble</code>.</p>
 <p>Hint: <code>labevents.csv.gz</code> is a data file too big to be read in by the <code>read_csv</code> function in its default setting. Utilize the <code>col_select</code> and <code>lazy</code> options in the <code>read_csv</code> function to reduce the memory burden.</p></li>
-<li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
-<li><p>Summarize the lab measurements by appropriate numerics and graphics.</p></li>
+</ol>
+<pre class="r"><code>  read_csv(str_c(mimic_path, &quot;/hosp/labevents.csv.gz&quot;),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% dlabitems_tble$itemid) %&gt;%
+  print(width = Inf)</code></pre>
+<pre class="r"><code>  read_csv(str_c(mimic_path, &quot;/hosp/labevents.csv.gz&quot;),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% dlabitems_tble$itemid) %&gt;%
+  print(width = Inf)</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</li>
+<li>Summarize the lab measurements by appropriate numerics and graphics.</li>
 </ol>
 </div>
 <div id="q6.-vitals-from-charted-events" class="section level2">
