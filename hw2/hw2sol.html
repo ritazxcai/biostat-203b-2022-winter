@@ -452,6 +452,7 @@ print(width = Inf)</code></pre>
 <ol style="list-style-type: decimal">
 <li>Import <code>admissions.csv.gz</code> as a tibble <code>admissions_tble</code>.</li>
 </ol>
+<p><strong>Solution:</strong></p>
 <pre class="r"><code>admissions &lt;- read_csv(str_c(mimic_path, &quot;/core/admissions.csv.gz&quot;))</code></pre>
 <pre><code>## Rows: 523740 Columns: 15
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -483,8 +484,63 @@ admissions_tble</code></pre>
 ## #   insurance &lt;chr&gt;, language &lt;chr&gt;, marital_status &lt;chr&gt;, ethnicity &lt;chr&gt;,
 ## #   edregtime &lt;dttm&gt;, edouttime &lt;dttm&gt;, hospital_expire_flag &lt;dbl&gt;</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</p></li>
-<li><p>Summarize the following variables by graphics.</p></li>
+<li>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</li>
+</ol>
+<p><strong>Solution:</strong></p>
+<pre class="r"><code>  semi_join(admissions_tble, icustays_tble, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 69,211 × 15
+##    subject_id  hadm_id admittime           dischtime          
+##         &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
+##  1   17275231 23654078 2147-03-19 18:47:00 2147-03-23 12:55:00
+##  2   10222255 28200985 2120-11-20 20:25:00 2120-11-22 13:00:00
+##  3   14485852 28712010 2113-10-31 00:23:00 2113-11-04 16:50:00
+##  4   18709254 23758948 2195-10-12 01:31:00 2195-10-12 13:51:00
+##  5   19119203 21682799 2115-04-01 02:12:00 2115-04-01 15:55:00
+##  6   16837807 23526268 2151-03-19 06:09:00 2151-03-19 07:20:00
+##  7   17642680 27734285 2116-05-29 12:48:00 2116-05-30 12:31:00
+##  8   18230965 21251728 2142-03-12 20:00:00 2142-03-17 15:26:00
+##  9   17374121 27667114 2115-07-22 07:15:00 2115-07-24 17:50:00
+## 10   13346506 28533404 2181-11-19 14:32:00 2181-11-22 18:47:00
+##    deathtime           admission_type     admission_location    
+##    &lt;dttm&gt;              &lt;chr&gt;              &lt;chr&gt;                 
+##  1 NA                  EW EMER.           EMERGENCY ROOM        
+##  2 NA                  EU OBSERVATION     TRANSFER FROM HOSPITAL
+##  3 NA                  EW EMER.           EMERGENCY ROOM        
+##  4 NA                  EU OBSERVATION     EMERGENCY ROOM        
+##  5 NA                  EU OBSERVATION     WALK-IN/SELF REFERRAL 
+##  6 2151-03-19 07:20:00 EU OBSERVATION     EMERGENCY ROOM        
+##  7 NA                  EU OBSERVATION     WALK-IN/SELF REFERRAL 
+##  8 NA                  URGENT             PHYSICIAN REFERRAL    
+##  9 NA                  DIRECT OBSERVATION PHYSICIAN REFERRAL    
+## 10 NA                  EU OBSERVATION     EMERGENCY ROOM        
+##    discharge_location insurance language marital_status ethnicity
+##    &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;    
+##  1 HOME               Medicare  ENGLISH  SINGLE         WHITE    
+##  2 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##  3 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
+##  4 &lt;NA&gt;               Medicaid  ENGLISH  WIDOWED        ASIAN    
+##  5 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##  6 &lt;NA&gt;               Medicare  ENGLISH  SINGLE         WHITE    
+##  7 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
+##  8 HOME               Other     ENGLISH  MARRIED        WHITE    
+##  9 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+## 10 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##    edregtime           edouttime           hospital_expire_flag
+##    &lt;dttm&gt;              &lt;dttm&gt;                             &lt;dbl&gt;
+##  1 2147-03-19 16:18:00 2147-03-19 20:40:00                    0
+##  2 2120-11-20 18:07:00 2120-11-21 20:25:00                    0
+##  3 2113-10-30 19:48:00 2113-10-31 05:10:00                    0
+##  4 2195-10-11 18:40:00 2195-10-12 02:47:00                    0
+##  5 2115-03-31 15:35:00 2115-04-01 03:49:00                    0
+##  6 2151-03-19 02:55:00 2151-03-19 06:59:00                    1
+##  7 2116-05-29 10:05:00 2116-05-30 01:17:00                    0
+##  8 NA                  NA                                     0
+##  9 NA                  NA                                     0
+## 10 2181-11-19 10:51:00 2181-11-19 15:12:00                    0
+## # … with 69,201 more rows</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Summarize the following variables by graphics.</li>
 </ol>
 <ul>
 <li>admission year<br />

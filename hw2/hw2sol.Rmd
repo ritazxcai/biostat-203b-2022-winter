@@ -133,6 +133,7 @@ system(
 
 1. Import `admissions.csv.gz` as a tibble `admissions_tble`.
 
+**Solution:**
 ```{r}
 admissions <- read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))
 admissions_tble <- as_tibble(admissions)
@@ -144,14 +145,12 @@ admissions_tble
 
 2. Let's only keep the admissions that have a match in `icustays_tble` according to `subject_id` and `hadmi_id`.
 
+**Solution:**
 ```{r}
-
-
-
+  semi_join(admissions_tble, icustays_tble, by = c("subject_id", "hadm_id")) %>%
+  print(width = Inf)
 
 ```
-
-
 
 3. Summarize the following variables by graphics. 
 
