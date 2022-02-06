@@ -113,7 +113,7 @@ There can be multiple ICU stays for the same subject ID. If unique subject IDs a
 
 **Solution:**
 The following code uses `slice_min` command, which takes longer to run:
-```{r, eval=T}
+```{r, eval=F}
 icustays_tble %>%
   arrange(icustays_tble, desc(subject_id)) %>%
   group_by(subject_id) %>%
@@ -183,10 +183,18 @@ admissions_tble
 - admission hour (anything unusual?)  
 
 **Solution:**
-```{r}
-
-
-
+```{r, eval=F}
+library(lubridate)
+admissions_tble %>%
+  mutate(datetime = ymd_hms("admittime") %>%
+  mutate(
+    admission_year = year(datetime),
+    admission_month = month(datetime),
+    admission_month_day = mday(datetime),
+    admission_week_day = wday(datetime),
+    admission_hour = hour(datetime)
+  ) %>%
+  summarise()
 
 
 ```
