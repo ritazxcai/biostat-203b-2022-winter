@@ -169,6 +169,7 @@ admissions_tble
 
 **Solution:**
 ```{r}
+admissions_tble %>%
   semi_join(admissions_tble, icustays_tble, by = c("subject_id", "hadm_id")) %>%
   print(width = Inf)
 
@@ -222,6 +223,7 @@ system(
 ```
 
 ```{r}
+patients_tble %>%
   semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
   print(width = Inf)
 
@@ -230,8 +232,25 @@ system(
 
 2. Summarize variables `gender` and `anchor_age`, and explain any patterns you see.
 
-**Solution:**
+**Solution:** by `gender`:
+```{r}
+semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  group_by(gender) %>%
+  summarise(n = n())
 
+```
+
+
+`anchor_age` by `gender`:
+```{r}
+semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  group_by(gender) %>%
+  summarise(mean_anchor_age = mean(anchor_age),
+            sd_anchor_age = sd(anchor_age))
+
+```
+
+Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects.
 
 ## Q5. Lab results
 

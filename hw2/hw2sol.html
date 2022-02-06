@@ -499,58 +499,59 @@ admissions_tble</code></pre>
 <li>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>  semi_join(admissions_tble, icustays_tble, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+<pre class="r"><code>admissions_tble %&gt;%
+  semi_join(admissions_tble, icustays_tble, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
   print(width = Inf)</code></pre>
-<pre><code>## # A tibble: 69,211 × 15
+<pre><code>## # A tibble: 523,740 × 15
 ##    subject_id  hadm_id admittime           dischtime          
 ##         &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
-##  1   17275231 23654078 2147-03-19 18:47:00 2147-03-23 12:55:00
-##  2   10222255 28200985 2120-11-20 20:25:00 2120-11-22 13:00:00
-##  3   14485852 28712010 2113-10-31 00:23:00 2113-11-04 16:50:00
-##  4   18709254 23758948 2195-10-12 01:31:00 2195-10-12 13:51:00
-##  5   19119203 21682799 2115-04-01 02:12:00 2115-04-01 15:55:00
-##  6   16837807 23526268 2151-03-19 06:09:00 2151-03-19 07:20:00
-##  7   17642680 27734285 2116-05-29 12:48:00 2116-05-30 12:31:00
-##  8   18230965 21251728 2142-03-12 20:00:00 2142-03-17 15:26:00
-##  9   17374121 27667114 2115-07-22 07:15:00 2115-07-24 17:50:00
-## 10   13346506 28533404 2181-11-19 14:32:00 2181-11-22 18:47:00
-##    deathtime           admission_type     admission_location    
-##    &lt;dttm&gt;              &lt;chr&gt;              &lt;chr&gt;                 
-##  1 NA                  EW EMER.           EMERGENCY ROOM        
-##  2 NA                  EU OBSERVATION     TRANSFER FROM HOSPITAL
-##  3 NA                  EW EMER.           EMERGENCY ROOM        
-##  4 NA                  EU OBSERVATION     EMERGENCY ROOM        
-##  5 NA                  EU OBSERVATION     WALK-IN/SELF REFERRAL 
-##  6 2151-03-19 07:20:00 EU OBSERVATION     EMERGENCY ROOM        
-##  7 NA                  EU OBSERVATION     WALK-IN/SELF REFERRAL 
-##  8 NA                  URGENT             PHYSICIAN REFERRAL    
-##  9 NA                  DIRECT OBSERVATION PHYSICIAN REFERRAL    
-## 10 NA                  EU OBSERVATION     EMERGENCY ROOM        
-##    discharge_location insurance language marital_status ethnicity
-##    &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;    
-##  1 HOME               Medicare  ENGLISH  SINGLE         WHITE    
-##  2 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
-##  3 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
-##  4 &lt;NA&gt;               Medicaid  ENGLISH  WIDOWED        ASIAN    
-##  5 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
-##  6 &lt;NA&gt;               Medicare  ENGLISH  SINGLE         WHITE    
-##  7 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
-##  8 HOME               Other     ENGLISH  MARRIED        WHITE    
-##  9 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
-## 10 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
-##    edregtime           edouttime           hospital_expire_flag
-##    &lt;dttm&gt;              &lt;dttm&gt;                             &lt;dbl&gt;
-##  1 2147-03-19 16:18:00 2147-03-19 20:40:00                    0
-##  2 2120-11-20 18:07:00 2120-11-21 20:25:00                    0
-##  3 2113-10-30 19:48:00 2113-10-31 05:10:00                    0
-##  4 2195-10-11 18:40:00 2195-10-12 02:47:00                    0
-##  5 2115-03-31 15:35:00 2115-04-01 03:49:00                    0
-##  6 2151-03-19 02:55:00 2151-03-19 06:59:00                    1
-##  7 2116-05-29 10:05:00 2116-05-30 01:17:00                    0
-##  8 NA                  NA                                     0
-##  9 NA                  NA                                     0
-## 10 2181-11-19 10:51:00 2181-11-19 15:12:00                    0
-## # … with 69,201 more rows</code></pre>
+##  1   14679932 21038362 2139-09-26 14:16:00 2139-09-28 11:30:00
+##  2   15585972 24941086 2123-10-07 23:56:00 2123-10-12 11:22:00
+##  3   11989120 21965160 2147-01-14 09:00:00 2147-01-17 14:25:00
+##  4   17817079 24709883 2165-12-27 17:33:00 2165-12-31 21:18:00
+##  5   15078341 23272159 2122-08-28 08:48:00 2122-08-30 12:32:00
+##  6   19124609 20517215 2169-03-14 12:44:00 2169-03-20 19:15:00
+##  7   17301855 29732723 2140-06-06 14:23:00 2140-06-08 14:25:00
+##  8   17991012 24298836 2181-07-10 20:28:00 2181-07-12 15:49:00
+##  9   16865435 23216961 2185-07-19 02:12:00 2185-07-21 11:50:00
+## 10   13693648 21640725 2111-01-30 23:43:00 2111-02-02 13:03:00
+##    deathtime admission_type admission_location discharge_location
+##    &lt;dttm&gt;    &lt;chr&gt;          &lt;chr&gt;              &lt;chr&gt;             
+##  1 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  2 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  3 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  4 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  5 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  6 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  7 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  8 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  9 NA        ELECTIVE       &lt;NA&gt;               HOME              
+## 10 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##    insurance language marital_status ethnicity              edregtime
+##    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;                  &lt;dttm&gt;   
+##  1 Other     ENGLISH  SINGLE         UNKNOWN                NA       
+##  2 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  3 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##  4 Other     ENGLISH  &lt;NA&gt;           OTHER                  NA       
+##  5 Other     ENGLISH  &lt;NA&gt;           BLACK/AFRICAN AMERICAN NA       
+##  6 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##  7 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  8 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  9 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+## 10 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##    edouttime hospital_expire_flag
+##    &lt;dttm&gt;                   &lt;dbl&gt;
+##  1 NA                           0
+##  2 NA                           0
+##  3 NA                           0
+##  4 NA                           0
+##  5 NA                           0
+##  6 NA                           0
+##  7 NA                           0
+##  8 NA                           0
+##  9 NA                           0
+## 10 NA                           0
+## # … with 523,730 more rows</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize the following variables by graphics.</li>
 </ol>
@@ -613,26 +614,46 @@ mutate(admissions_tble,
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>  patients_tble &lt;- as_tibble(patients)</code></pre>
-<pre class="r"><code>  semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
+<pre class="r"><code>patients_tble %&gt;%
+  semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
   print(width = Inf)</code></pre>
-<pre><code>## # A tibble: 53,150 × 6
-##    subject_id gender anchor_age anchor_year anchor_year_group dod       
-##         &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;             &lt;date&gt;    
-##  1   10018928 F              31        2125 2008 - 2010       NA        
-##  2   10076543 F              78        2187 2008 - 2010       NA        
-##  3   10098428 F              85        2119 2008 - 2010       NA        
-##  4   10127185 M              60        2141 2008 - 2010       NA        
-##  5   10148710 M              67        2137 2008 - 2010       NA        
-##  6   10156486 F              75        2124 2017 - 2019       NA        
-##  7   10159585 M              59        2146 2008 - 2010       2154-04-16
-##  8   10171525 F              27        2115 2014 - 2016       NA        
-##  9   10196360 M              57        2118 2011 - 2013       NA        
-## 10   10227823 M              45        2156 2014 - 2016       NA        
-## # … with 53,140 more rows</code></pre>
+<pre><code>## # A tibble: 382,278 × 6
+##    subject_id gender anchor_age anchor_year anchor_year_group dod   
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;             &lt;date&gt;
+##  1   10000048 F              23        2126 2008 - 2010       NA    
+##  2   10002723 F               0        2128 2017 - 2019       NA    
+##  3   10003939 M               0        2184 2008 - 2010       NA    
+##  4   10004222 M               0        2161 2014 - 2016       NA    
+##  5   10005325 F               0        2154 2011 - 2013       NA    
+##  6   10007338 F               0        2153 2017 - 2019       NA    
+##  7   10008101 M               0        2142 2008 - 2010       NA    
+##  8   10009872 F               0        2168 2014 - 2016       NA    
+##  9   10011333 F               0        2132 2014 - 2016       NA    
+## 10   10011879 M               0        2158 2014 - 2016       NA    
+## # … with 382,268 more rows</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Summarize variables <code>gender</code> and <code>anchor_age</code>, and explain any patterns you see.</li>
 </ol>
-<p><strong>Solution:</strong></p>
+<p><strong>Solution:</strong> by <code>gender</code>:</p>
+<pre class="r"><code>semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
+  group_by(gender) %&gt;%
+  summarise(n = n())</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   gender     n
+##   &lt;chr&gt;  &lt;int&gt;
+## 1 F      23353
+## 2 M      29797</code></pre>
+<p><code>anchor_age</code> by <code>gender</code>:</p>
+<pre class="r"><code>semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
+  group_by(gender) %&gt;%
+  summarise(mean_anchor_age = mean(anchor_age),
+            sd_anchor_age = sd(anchor_age))</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   gender mean_anchor_age sd_anchor_age
+##   &lt;chr&gt;            &lt;dbl&gt;         &lt;dbl&gt;
+## 1 F                 64.8          17.9
+## 2 M                 62.5          16.6</code></pre>
+<p>Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects.</p>
 </div>
 <div id="q5.-lab-results" class="section level2">
 <h2>Q5. Lab results</h2>
