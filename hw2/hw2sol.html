@@ -213,7 +213,8 @@ pre code {
 <pre class="r"><code>knitr::opts_chunk$set(echo = TRUE, cache = TRUE, cache.lazy = FALSE)
 library(tidyverse)
 library(data.table)
-library(lubridate)</code></pre>
+library(lubridate)
+library(dplyr)</code></pre>
 <pre class="r"><code>os &lt;- sessionInfo()$running
 if (str_detect(os, &quot;Linux&quot;)) {
   mimic_path &lt;- &quot;/mnt/mimiciv/1.0&quot;
@@ -316,15 +317,16 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 <li>Import <code>icustatys.csv.gz</code> as a tibble <code>icustays_tble</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>system(
+<pre class="r"><code>icustays &lt;- system(
   str_c(
     &quot;zcat &lt; &quot;, 
     shQuote(str_c(mimic_path, &quot;/icu/icustays.csv.gz&quot;)), 
     &quot; | head&quot;
     ), 
   intern = TRUE
-) %&gt;%
-  as_tibble()</code></pre>
+)
+icustays_tble &lt;-  as_tibble(icustays)
+icustays_tble</code></pre>
 <pre><code>## # A tibble: 10 × 1
 ##    value                                                                        
 ##    &lt;chr&gt;                                                                        
@@ -353,6 +355,7 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 <ol start="3" style="list-style-type: decimal">
 <li>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</li>
 </ol>
+<pre class="r"><code>  distinct(icustays_tble, subject_id, .keep_all = TRUE)</code></pre>
 </div>
 <div id="q3.-admission-data" class="section level2">
 <h2>Q3. <code>admission</code> data</h2>
