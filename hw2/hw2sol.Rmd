@@ -112,6 +112,7 @@ There can be multiple ICU stays for the same subject ID. If unique subject IDs a
 3. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`.
 
 **Solution:**
+The following code uses `slice_min` command, which takes longer to run:
 ```{r, eval=T}
 icustays_tble %>%
   arrange(icustays_tble, desc(subject_id)) %>%
@@ -121,8 +122,17 @@ icustays_tble %>%
 
 ```
 
+The following code takes shorter to run and gives the exact same results:
+```{r, eval=T}
+icustays_tble %>%
+  arrange(icustays_tble, desc(subject_id)) %>%
+  group_by(subject_id) %>%
+  filter(rank(intime) < 2) %>%
+  print(width = Inf)
 
-**This only extracts the unique subjects but not necessarily with the first ICU visits:**
+```
+
+This only extracts the unique subjects but not necessarily with the first ICU visits (do not run):
 ```{r, eval=F}
 icustays_tble
 distinct(icustays_tble, subject_id, .keep_all = TRUE) %>%
