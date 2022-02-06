@@ -696,7 +696,12 @@ mutate(admissions_tble,
 ##  [9] &quot;51068,24 hr Protein,Urine,Chemistry,&quot;             
 ## [10] &quot;50853,25-OH Vitamin D,Blood,Chemistry,&quot;</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>Find how many rows are in <code>labevents.csv.gz</code>.</p></li>
+<li>Find how many rows are in <code>labevents.csv.gz</code>.</li>
+</ol>
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/hosp/labevents.csv.gz | awk &#39;END { print NR }&#39;
+</code></pre>
+<p><strong>Solution:</strong> The number of rows is 122103668.</p>
+<ol start="2" style="list-style-type: decimal">
 <li><p>We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of <code>labevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>labevents_tble</code>.</p>
 <p>Hint: <code>labevents.csv.gz</code> is a data file too big to be read in by the <code>read_csv</code> function in its default setting. Utilize the <code>col_select</code> and <code>lazy</code> options in the <code>read_csv</code> function to reduce the memory burden.</p></li>
 <li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
