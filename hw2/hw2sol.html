@@ -691,7 +691,13 @@ admissions_tble %&gt;%
 <li>Import <code>patients.csv.gz</code> (<a href="https://mimic.mit.edu/docs/iv/modules/core/patients/" class="uri">https://mimic.mit.edu/docs/iv/modules/core/patients/</a>) as a tibble <code>patients_tble</code> and only keep the patients who have a match in <code>icustays_tble</code> (according to <code>subject_id</code>).</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>patients &lt;- read_csv(str_c(mimic_path, &quot;/core/patients.csv.gz&quot;))</code></pre>
+<pre class="r"><code>patients_tble &lt;- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, &quot;/core/patients.csv.gz&quot;
+  )
+)) %&gt;%
+  print (width = Inf)</code></pre>
 <pre><code>## Rows: 382278 Columns: 6
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -701,8 +707,22 @@ admissions_tble %&gt;%
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>  patients_tble &lt;- as_tibble(patients)</code></pre>
-<pre class="r"><code>semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
+<pre><code>## # A tibble: 382,278 × 6
+##    subject_id gender anchor_age anchor_year anchor_year_group dod   
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;             &lt;date&gt;
+##  1   10000048 F              23        2126 2008 - 2010       NA    
+##  2   10002723 F               0        2128 2017 - 2019       NA    
+##  3   10003939 M               0        2184 2008 - 2010       NA    
+##  4   10004222 M               0        2161 2014 - 2016       NA    
+##  5   10005325 F               0        2154 2011 - 2013       NA    
+##  6   10007338 F               0        2153 2017 - 2019       NA    
+##  7   10008101 M               0        2142 2008 - 2010       NA    
+##  8   10009872 F               0        2168 2014 - 2016       NA    
+##  9   10011333 F               0        2132 2014 - 2016       NA    
+## 10   10011879 M               0        2158 2014 - 2016       NA    
+## # … with 382,268 more rows</code></pre>
+<pre class="r"><code>patients_tble &lt;-
+semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
   print(width = Inf)</code></pre>
 <pre><code>## # A tibble: 53,150 × 6
 ##    subject_id gender anchor_age anchor_year anchor_year_group dod       
