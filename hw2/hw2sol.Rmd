@@ -95,7 +95,6 @@ icustays_tble <- as_tibble(
   )
 )) %>%
   print (width = Inf)
-
 ```
 
 2. How many unique `subject_id`? Can a `subject_id` have multiple ICU stays? 
@@ -125,7 +124,6 @@ icustays_tble <-
   group_by(subject_id) %>%
   slice_min(order_by = intime) %>%
   print(width = Inf)
-
 ```
 
 The following code takes shorter to run and gives the exact same results:
@@ -137,7 +135,6 @@ icustays_tble <-
   filter(rank(intime) < 2) %>%
   ungroup() %>%
   print(width = Inf)
-
 ```
 
 This only extracts the unique subjects but not necessarily with the first ICU visits (do not run):
@@ -165,12 +162,14 @@ system(
 
 **Solution:**
 ```{r}
-admissions <- read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))
-admissions_tble <- as_tibble(admissions)
-
-admissions_tble
+admissions_tble <- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, "/core/admissions.csv.gz"
+  )
+)) %>%
+  print (width = Inf)
 ```
-
 
 
 2. Let's only keep the admissions that have a match in `icustays_tble` according to `subject_id` and `hadmi_id`.

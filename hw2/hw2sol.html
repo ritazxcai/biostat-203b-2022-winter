@@ -488,7 +488,13 @@ print(width = Inf)</code></pre>
 <li>Import <code>admissions.csv.gz</code> as a tibble <code>admissions_tble</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>admissions &lt;- read_csv(str_c(mimic_path, &quot;/core/admissions.csv.gz&quot;))</code></pre>
+<pre class="r"><code>admissions_tble &lt;- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, &quot;/core/admissions.csv.gz&quot;
+  )
+)) %&gt;%
+  print (width = Inf)</code></pre>
 <pre><code>## Rows: 523740 Columns: 15
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -498,9 +504,6 @@ print(width = Inf)</code></pre>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>admissions_tble &lt;- as_tibble(admissions)
-
-admissions_tble</code></pre>
 <pre><code>## # A tibble: 523,740 × 15
 ##    subject_id  hadm_id admittime           dischtime          
 ##         &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
@@ -514,10 +517,43 @@ admissions_tble</code></pre>
 ##  8   17991012 24298836 2181-07-10 20:28:00 2181-07-12 15:49:00
 ##  9   16865435 23216961 2185-07-19 02:12:00 2185-07-21 11:50:00
 ## 10   13693648 21640725 2111-01-30 23:43:00 2111-02-02 13:03:00
-## # … with 523,730 more rows, and 11 more variables: deathtime &lt;dttm&gt;,
-## #   admission_type &lt;chr&gt;, admission_location &lt;chr&gt;, discharge_location &lt;chr&gt;,
-## #   insurance &lt;chr&gt;, language &lt;chr&gt;, marital_status &lt;chr&gt;, ethnicity &lt;chr&gt;,
-## #   edregtime &lt;dttm&gt;, edouttime &lt;dttm&gt;, hospital_expire_flag &lt;dbl&gt;</code></pre>
+##    deathtime admission_type admission_location discharge_location
+##    &lt;dttm&gt;    &lt;chr&gt;          &lt;chr&gt;              &lt;chr&gt;             
+##  1 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  2 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  3 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  4 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  5 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  6 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  7 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  8 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##  9 NA        ELECTIVE       &lt;NA&gt;               HOME              
+## 10 NA        ELECTIVE       &lt;NA&gt;               HOME              
+##    insurance language marital_status ethnicity              edregtime
+##    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;                  &lt;dttm&gt;   
+##  1 Other     ENGLISH  SINGLE         UNKNOWN                NA       
+##  2 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  3 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##  4 Other     ENGLISH  &lt;NA&gt;           OTHER                  NA       
+##  5 Other     ENGLISH  &lt;NA&gt;           BLACK/AFRICAN AMERICAN NA       
+##  6 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##  7 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  8 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  9 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+## 10 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##    edouttime hospital_expire_flag
+##    &lt;dttm&gt;                   &lt;dbl&gt;
+##  1 NA                           0
+##  2 NA                           0
+##  3 NA                           0
+##  4 NA                           0
+##  5 NA                           0
+##  6 NA                           0
+##  7 NA                           0
+##  8 NA                           0
+##  9 NA                           0
+## 10 NA                           0
+## # … with 523,730 more rows</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</li>
 </ol>
