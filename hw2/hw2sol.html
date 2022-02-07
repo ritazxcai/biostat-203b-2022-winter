@@ -499,8 +499,9 @@ admissions_tble</code></pre>
 <li>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>admissions_tble %&gt;%
-  semi_join(admissions_tble, icustays_tble, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+<pre class="r"><code>admissions_tble &lt;- admissions_tble %&gt;%
+  semi_join(admissions_tble, icustays_tble,
+            by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
   print(width = Inf)</code></pre>
 <pre><code>## # A tibble: 523,740 × 15
 ##    subject_id  hadm_id admittime           dischtime          
@@ -567,16 +568,22 @@ admissions_tble</code></pre>
 <li>admission hour (anything unusual?)</li>
 </ul>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>library(lubridate)
-datetime &lt;- ymd_hms(admissions_tble, &quot;admittime&quot;)
-mutate(admissions_tble,
-    admission_year = year(datetime),
-    admission_month = month(datetime),
-    admission_month_day = mday(datetime),
-    admission_week_day = wday(datetime),
-    admission_hour = hour(datetime)
-  ) %&gt;%
-  print(width = Inf)</code></pre>
+<pre class="r"><code>admissions_tble %&gt;%
+    mutate(dur = as.duration(dischtime - admittime)) %&gt;%
+  filter(dur &gt; 0) %&gt;%
+    summarise(
+        mean_d_year = mean(dur / 31557600),
+        sd_d_year = sd(dur / 31557600),
+        min_d_year = min(dur / 31557600),
+        max_d_year = max(dur / 31557600)
+        ) %&gt;%
+    print(width = Inf)
+
+admissions_tble %&gt;%
+  mutate(dur = as.duration(dischtime - admittime)) %&gt;%
+    ggplot() +
+    geom_histogram(mapping = aes(x = dur / 31557600)) +
+    labs(x = &quot;hospital stay duration (in years)&quot;)</code></pre>
 </div>
 <div id="q4.-patients-data" class="section level2">
 <h2>Q4. <code>patients</code> data</h2>

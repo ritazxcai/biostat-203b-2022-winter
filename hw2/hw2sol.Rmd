@@ -169,8 +169,9 @@ admissions_tble
 
 **Solution:**
 ```{r}
-admissions_tble %>%
-  semi_join(admissions_tble, icustays_tble, by = c("subject_id", "hadm_id")) %>%
+admissions_tble <- admissions_tble %>%
+  semi_join(admissions_tble, icustays_tble,
+            by = c("subject_id", "hadm_id")) %>%
   print(width = Inf)
 
 ```
@@ -185,16 +186,22 @@ admissions_tble %>%
 
 **Solution:**
 ```{r, eval=F}
-library(lubridate)
-datetime <- ymd_hms(admissions_tble, "admittime")
-mutate(admissions_tble,
-    admission_year = year(datetime),
-    admission_month = month(datetime),
-    admission_month_day = mday(datetime),
-    admission_week_day = wday(datetime),
-    admission_hour = hour(datetime)
-  ) %>%
-  print(width = Inf)
+admissions_tble %>%
+	mutate(dur = as.duration(dischtime - admittime)) %>%
+  filter(dur > 0) %>%
+	summarise(
+		mean_d_year = mean(dur / 31557600),
+		sd_d_year = sd(dur / 31557600),
+		min_d_year = min(dur / 31557600),
+		max_d_year = max(dur / 31557600)
+		) %>%
+	print(width = Inf)
+
+admissions_tble %>%
+  mutate(dur = as.duration(dischtime - admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = dur / 31557600)) +
+	labs(x = "hospital stay duration (in years)")
 
 ```
 
