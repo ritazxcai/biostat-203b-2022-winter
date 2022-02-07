@@ -705,45 +705,44 @@ mutate(admissions_tble,
 <ol start="2" style="list-style-type: decimal">
 <li><p>We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of <code>labevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>labevents_tble</code>.</p>
 <p>Hint: <code>labevents.csv.gz</code> is a data file too big to be read in by the <code>read_csv</code> function in its default setting. Utilize the <code>col_select</code> and <code>lazy</code> options in the <code>read_csv</code> function to reduce the memory burden.</p></li>
+<li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
 </ol>
 <p><strong>Solution:</strong> First, I used the lab item directory to create a list of the 10 items we want.</p>
-<pre class="r"><code>dlabitems_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/d_labitems.csv.gz&quot;),
-      col_select = c(itemid),
-      col_types = cols_only(itemid = col_double())) %&gt;%
-filter(itemid == 50912 |
-       itemid == 50971 |
-       itemid == 50983 |
-       itemid == 50902 |
-       itemid == 50882 |
-       itemid == 51221 |
-       itemid == 51301 |
-       itemid == 50931 |
-       itemid == 50960 |
-       itemid == 50893) %&gt;%
-print(width = Inf)</code></pre>
+<pre class="r"><code>dlabitems_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/d_labitems.csv.gz&quot;)) %&gt;%
+    filter(itemid %in% c(
+        50912,
+        50971,
+        50983,
+        50902,
+        50882,
+        51221,
+        51301,
+        50931,
+        50960,
+        50893)) %&gt;%
+    print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>dlabitems_tble$itemid</code></pre>
 <p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>labevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/labevents.csv.gz&quot;),
-      col_select = c(subject_id, itemid, charttime, valuenum),
-      col_types = cols_only(subject_id = col_double(), 
-                            itemid = col_double(), 
-                            charttime = col_datetime(), 
-                            valuenum = col_double()),
-      lazy = TRUE) %&gt;%
-  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
-  filter(itemid %in% dlabitems_tble$itemid) %&gt;%
-  print(width = Inf)</code></pre>
+<pre class="r"><code>labevents_tble &lt;- labevents_tble %&gt;%
+    left_join(select(icustays_tble, subject_id, intime),
+        by = c(&quot;subject_id&quot;)) %&gt;%
+    filter (charttime &gt;= intime) %&gt;%
+    group_by(subject_id, itemid) %&gt;%
+    arrange(charttime, .by_group = TRUE) %&gt;%
+    slice_head(n = 1) %&gt;%
+    select(-charttime, -intime) %&gt;%
+    ungroup %&gt;%
+    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
+    rename_at(
+        vars(as.character(dlabitems_tble$itemid)),
+        ~str_to_lower(dlabitems_tble$label)
+        ) %&gt;%
+    rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
+    print(width = Inf)</code></pre>
 <ol start="3" style="list-style-type: decimal">
-<li>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</li>
-</ol>
-<pre class="r"><code>labevents_tble %&gt;%
-  arrange(labevents_tble, desc(subject_id)) %&gt;%
-  group_by(subject_id) %&gt;%
-  filter(rank(charttime) &lt; 2) %&gt;%
-  print(width = Inf)</code></pre>
-<ol start="4" style="list-style-type: decimal">
-<li>Summarize the lab measurements by appropriate numerics and graphics.</li>
+<li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
+<li><p>Summarize the lab measurements by appropriate numerics and graphics.</p></li>
 </ol>
 </div>
 <div id="q6.-vitals-from-charted-events" class="section level2">
@@ -785,40 +784,36 @@ print(width = Inf)</code></pre>
 ##  [9] &quot;220052,Arterial Blood Pressure mean,ABPm,chartevents,Routine Vital Signs,mmHg,Numeric,,&quot;         
 ## [10] &quot;220056,Arterial Blood Pressure Alarm - Low,ABP Alarm - Low,chartevents,Alarms,mmHg,Numeric,,&quot;</code></pre>
 <ol style="list-style-type: decimal">
-<li>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</li>
+<li><p>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</p></li>
+<li><p>Further restrict <code>chartevents_tble</code> to the first vital measurement during the ICU stay.</p></li>
 </ol>
 <p><strong>Solution:</strong> First, I used the item directory to create a list of the 5 items we want:</p>
-<pre class="r"><code>ditems_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/d_items.csv.gz&quot;),
-      col_select = c(itemid),
-      col_types = cols_only(itemid = col_double())) %&gt;%
-filter(itemid == 220045 |
-       itemid == 220181 |
-       itemid == 220179 |
-       itemid == 223761 |
-       itemid == 220210) %&gt;%
-print(width = Inf)</code></pre>
+<pre class="r"><code>ditems_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/d_items.csv.gz&quot;)) %&gt;%
+    filter(itemid %in% c(
+        220045,
+        220181,
+        220179,
+        223761,
+        220210)) %&gt;%
+    print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>ditems_tble$itemid</code></pre>
 <p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>chartevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/chartevents.csv.gz&quot;),
-      col_select = c(subject_id, itemid, charttime, valuenum),
-      col_types = cols_only(subject_id = col_double(), 
-                            itemid = col_double(), 
-                            charttime = col_datetime(), 
-                            valuenum = col_double()),
-      lazy = TRUE) %&gt;%
-  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
-  filter(itemid %in% ditems_tble$itemid) %&gt;%
-  print(width = Inf)</code></pre>
-<ol start="2" style="list-style-type: decimal">
-<li>Further restrict <code>chartevents_tble</code> to the first vital measurement during the ICU stay.</li>
-</ol>
-<p><strong>Solution:</strong></p>
-<pre class="r"><code>chartevents_tble %&gt;%
-  arrange(chartevents_tble, desc(subject_id)) %&gt;%
-  group_by(subject_id) %&gt;%
-  filter(rank(charttime) &lt; 2) %&gt;%
-  print(width = Inf)</code></pre>
+<pre class="r"><code>chartevents_tble &lt;- chartevents_tble %&gt;%
+    left_join(select(icustays_tble, subject_id, intime),
+        by = c(&quot;subject_id&quot;)) %&gt;%
+    filter (charttime &gt;= intime) %&gt;%
+    group_by(subject_id, itemid) %&gt;%
+    arrange(charttime, .by_group = TRUE) %&gt;%
+    slice_head(n = 1) %&gt;%
+    select(-charttime, -intime) %&gt;%
+    ungroup %&gt;%
+    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
+    rename_at(
+        vars(as.character(ditems_tble$itemid)),
+        ~str_to_lower(ditems_tble$label)
+        ) %&gt;%
+    print(width = Inf)</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize these vital measurements by appropriate numerics and graphics.</li>
 </ol>
@@ -842,6 +837,22 @@ print(width = Inf)</code></pre>
 <li>first vital measurements during ICU stay</li>
 <li>an indicator variable <code>thirty_day_mort</code> whether the patient died within 30 days of hospital admission (30 day mortality)</li>
 </ul>
+<pre class="r"><code>icustays_tble &lt;- icustays_tble %&gt;%
+    filter(anchor_age &gt; 18) %&gt;%
+    print(width = Inf)</code></pre>
+<pre class="r"><code># Merging tibbles &amp; adding variable `thirty_day_mort` #
+mimic_icu_cohort &lt;- left_join(icustays_tble, admissions_tble,
+            by = c(&quot;subject_id&quot;)) %&gt;%
+    left_join(mimic_icu_cohort, patients_tble,
+        by = c(&quot;subject_id&quot;)) %&gt;%
+    left_join(mimic_icu_cohort, labevents_tble,
+        by = c(&quot;subject_id&quot;)) %&gt;%
+    left_join(mimic_icu_cohort, chartevents_tble,
+        by = c(&quot;subject_id&quot;)) %&gt;%
+    mutate(dth_days = as.duration(deathtime - admittime)) %&gt;%
+    mutate(thirty_day_mort = (dth_days/86400 &lt;= 30) * 1) %&gt;%
+    select(-dth_days) %&gt;%
+    print(width = Inf)</code></pre>
 </div>
 <div id="q8.-exploratory-data-analysis-eda" class="section level2">
 <h2>Q8. Exploratory data analysis (EDA)</h2>
