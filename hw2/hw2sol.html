@@ -958,7 +958,7 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
         ~str_to_lower(ditems_tble$label)
         ) %&gt;%
     print(width = Inf) %&gt;%
-  write_rds(&quot;charteventsb.tble.rds&quot;)</code></pre>
+  write_rds(&quot;chartevents.tble.rds&quot;)</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize these vital measurements by appropriate numerics and graphics.</li>
 </ol>
@@ -981,22 +981,23 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
 <li>first vital measurements during ICU stay</li>
 <li>an indicator variable <code>thirty_day_mort</code> whether the patient died within 30 days of hospital admission (30 day mortality)</li>
 </ul>
-<pre class="r"><code>icustays_tble &lt;- icustays_tble %&gt;%
-    filter(anchor_age &gt; 18) %&gt;%
-    print(width = Inf)</code></pre>
 <pre class="r"><code># Merging tibbles &amp; adding variable `thirty_day_mort` #
-mimic_icu_cohort &lt;- left_join(icustays_tble, admissions_tble,
-            by = c(&quot;subject_id&quot;)) %&gt;%
-    left_join(mimic_icu_cohort, patients_tble,
+mimic_icu_cohort &lt;-
+  icustays_tble %&gt;%
+  left_join(admissions_tble,
+            by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+    left_join(patients_tble,
         by = c(&quot;subject_id&quot;)) %&gt;%
-    left_join(mimic_icu_cohort, labevents_tble,
+    left_join(labevents_tble,
         by = c(&quot;subject_id&quot;)) %&gt;%
-    left_join(mimic_icu_cohort, chartevents_tble,
+    left_join(chartevents_tble,
         by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(anchor_age &gt; 18) %&gt;%
     mutate(dth_days = as.duration(deathtime - admittime)) %&gt;%
     mutate(thirty_day_mort = (dth_days/86400 &lt;= 30) * 1) %&gt;%
     select(-dth_days) %&gt;%
-    print(width = Inf)</code></pre>
+    print(width = Inf) %&gt;%
+  write_rds(&quot;mimic_icu_cohort.rds&quot;)</code></pre>
 </div>
 <div id="q8.-exploratory-data-analysis-eda" class="section level2">
 <h2>Q8. Exploratory data analysis (EDA)</h2>
