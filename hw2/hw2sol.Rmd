@@ -279,6 +279,18 @@ semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
 
 Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects. Both genders have a minimum anchor age of 18 and maximum anchor age of 91.
 
+```{r, eval=F}
+patients_tble %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = anchor_age))
+```
+
+```{r, eval=F}
+patients_tble %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(y = anchor_age))
+```
+
 ## Q5. Lab results
 
 `labevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/hosp/labevents/>) contains all laboratory measurements for patients. The first 10 lines are

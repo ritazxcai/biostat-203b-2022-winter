@@ -684,6 +684,12 @@ admissions_tble %&gt;%
 ## 1 F                 64.8          17.9    18    91
 ## 2 M                 62.5          16.6    18    91</code></pre>
 <p>Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects. Both genders have a minimum anchor age of 18 and maximum anchor age of 91.</p>
+<pre class="r"><code>patients_tble %&gt;%
+  ggplot() +
+  geom_bar(mapping = aes(x = anchor_age))</code></pre>
+<pre class="r"><code>patients_tble %&gt;%
+  ggplot() +
+  geom_boxplot(mapping = aes(y = anchor_age))</code></pre>
 </div>
 <div id="q5.-lab-results" class="section level2">
 <h2>Q5. Lab results</h2>
