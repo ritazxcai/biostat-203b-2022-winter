@@ -177,9 +177,15 @@ pre code {
 <li><a href="#q3.-admission-data">Q3. <code>admission</code> data</a></li>
 <li><a href="#q4.-patients-data">Q4. <code>patients</code> data</a></li>
 <li><a href="#q5.-lab-results">Q5. Lab results</a></li>
+<li><a href="#importing-labevents.csv.gz">importing labevents.csv.gz</a>
+<ul>
 <li><a href="#q6.-vitals-from-charted-events">Q6. Vitals from charted events</a></li>
+</ul></li>
+<li><a href="#importing-chartevents.csv.gz">importing chartevents.csv.gz</a>
+<ul>
 <li><a href="#q7.-putting-things-together">Q7. Putting things together</a></li>
 <li><a href="#q8.-exploratory-data-analysis-eda">Q8. Exploratory data analysis (EDA)</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -391,7 +397,8 @@ icustays_tble</code></pre>
   slice_min(order_by = intime) %&gt;%
   print(width = Inf)</code></pre>
 <p>The following code takes shorter to run and gives the exact same results:</p>
-<pre class="r"><code>icustays_tble %&gt;%
+<pre class="r"><code>icustays_tble &lt;-
+  icustays_tble %&gt;%
   arrange(icustays_tble, desc(subject_id)) %&gt;%
   group_by(subject_id) %&gt;%
   filter(rank(intime) &lt; 2) %&gt;%
@@ -499,60 +506,60 @@ admissions_tble</code></pre>
 <li>Let’s only keep the admissions that have a match in <code>icustays_tble</code> according to <code>subject_id</code> and <code>hadmi_id</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>admissions_tble &lt;- admissions_tble %&gt;%
+<pre class="r"><code>admissions_tble &lt;-
   semi_join(admissions_tble, icustays_tble,
             by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
   print(width = Inf)</code></pre>
-<pre><code>## # A tibble: 523,740 × 15
+<pre><code>## # A tibble: 53,150 × 15
 ##    subject_id  hadm_id admittime           dischtime          
 ##         &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
-##  1   14679932 21038362 2139-09-26 14:16:00 2139-09-28 11:30:00
-##  2   15585972 24941086 2123-10-07 23:56:00 2123-10-12 11:22:00
-##  3   11989120 21965160 2147-01-14 09:00:00 2147-01-17 14:25:00
-##  4   17817079 24709883 2165-12-27 17:33:00 2165-12-31 21:18:00
-##  5   15078341 23272159 2122-08-28 08:48:00 2122-08-30 12:32:00
-##  6   19124609 20517215 2169-03-14 12:44:00 2169-03-20 19:15:00
-##  7   17301855 29732723 2140-06-06 14:23:00 2140-06-08 14:25:00
-##  8   17991012 24298836 2181-07-10 20:28:00 2181-07-12 15:49:00
-##  9   16865435 23216961 2185-07-19 02:12:00 2185-07-21 11:50:00
-## 10   13693648 21640725 2111-01-30 23:43:00 2111-02-02 13:03:00
-##    deathtime admission_type admission_location discharge_location
-##    &lt;dttm&gt;    &lt;chr&gt;          &lt;chr&gt;              &lt;chr&gt;             
-##  1 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  2 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  3 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  4 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  5 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  6 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  7 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  8 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##  9 NA        ELECTIVE       &lt;NA&gt;               HOME              
-## 10 NA        ELECTIVE       &lt;NA&gt;               HOME              
-##    insurance language marital_status ethnicity              edregtime
-##    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;                  &lt;dttm&gt;   
-##  1 Other     ENGLISH  SINGLE         UNKNOWN                NA       
-##  2 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
-##  3 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
-##  4 Other     ENGLISH  &lt;NA&gt;           OTHER                  NA       
-##  5 Other     ENGLISH  &lt;NA&gt;           BLACK/AFRICAN AMERICAN NA       
-##  6 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
-##  7 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
-##  8 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
-##  9 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
-## 10 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
-##    edouttime hospital_expire_flag
-##    &lt;dttm&gt;                   &lt;dbl&gt;
-##  1 NA                           0
-##  2 NA                           0
-##  3 NA                           0
-##  4 NA                           0
-##  5 NA                           0
-##  6 NA                           0
-##  7 NA                           0
-##  8 NA                           0
-##  9 NA                           0
-## 10 NA                           0
-## # … with 523,730 more rows</code></pre>
+##  1   10222255 28200985 2120-11-20 20:25:00 2120-11-22 13:00:00
+##  2   14485852 28712010 2113-10-31 00:23:00 2113-11-04 16:50:00
+##  3   18709254 23758948 2195-10-12 01:31:00 2195-10-12 13:51:00
+##  4   16837807 23526268 2151-03-19 06:09:00 2151-03-19 07:20:00
+##  5   17642680 27734285 2116-05-29 12:48:00 2116-05-30 12:31:00
+##  6   18230965 21251728 2142-03-12 20:00:00 2142-03-17 15:26:00
+##  7   17374121 27667114 2115-07-22 07:15:00 2115-07-24 17:50:00
+##  8   13346506 28533404 2181-11-19 14:32:00 2181-11-22 18:47:00
+##  9   18030332 24679656 2152-07-22 21:28:00 2152-07-27 16:49:00
+## 10   14328744 29576470 2126-08-20 09:26:00 2126-08-21 11:36:00
+##    deathtime           admission_type     admission_location    
+##    &lt;dttm&gt;              &lt;chr&gt;              &lt;chr&gt;                 
+##  1 NA                  EU OBSERVATION     TRANSFER FROM HOSPITAL
+##  2 NA                  EW EMER.           EMERGENCY ROOM        
+##  3 NA                  EU OBSERVATION     EMERGENCY ROOM        
+##  4 2151-03-19 07:20:00 EU OBSERVATION     EMERGENCY ROOM        
+##  5 NA                  EU OBSERVATION     WALK-IN/SELF REFERRAL 
+##  6 NA                  URGENT             PHYSICIAN REFERRAL    
+##  7 NA                  DIRECT OBSERVATION PHYSICIAN REFERRAL    
+##  8 NA                  EU OBSERVATION     EMERGENCY ROOM        
+##  9 NA                  URGENT             TRANSFER FROM HOSPITAL
+## 10 NA                  EU OBSERVATION     EMERGENCY ROOM        
+##    discharge_location insurance language marital_status ethnicity
+##    &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;    
+##  1 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##  2 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
+##  3 &lt;NA&gt;               Medicaid  ENGLISH  WIDOWED        ASIAN    
+##  4 &lt;NA&gt;               Medicare  ENGLISH  SINGLE         WHITE    
+##  5 &lt;NA&gt;               Other     ENGLISH  SINGLE         WHITE    
+##  6 HOME               Other     ENGLISH  MARRIED        WHITE    
+##  7 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##  8 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##  9 HOME               Other     ENGLISH  MARRIED        UNKNOWN  
+## 10 &lt;NA&gt;               Other     ENGLISH  MARRIED        WHITE    
+##    edregtime           edouttime           hospital_expire_flag
+##    &lt;dttm&gt;              &lt;dttm&gt;                             &lt;dbl&gt;
+##  1 2120-11-20 18:07:00 2120-11-21 20:25:00                    0
+##  2 2113-10-30 19:48:00 2113-10-31 05:10:00                    0
+##  3 2195-10-11 18:40:00 2195-10-12 02:47:00                    0
+##  4 2151-03-19 02:55:00 2151-03-19 06:59:00                    1
+##  5 2116-05-29 10:05:00 2116-05-30 01:17:00                    0
+##  6 NA                  NA                                     0
+##  7 NA                  NA                                     0
+##  8 2181-11-19 10:51:00 2181-11-19 15:12:00                    0
+##  9 NA                  NA                                     0
+## 10 2126-08-19 23:01:00 2126-08-20 10:14:00                    0
+## # … with 53,140 more rows</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize the following variables by graphics.</li>
 </ol>
@@ -632,7 +639,7 @@ admissions_tble %&gt;%
 <li>Import <code>patients.csv.gz</code> (<a href="https://mimic.mit.edu/docs/iv/modules/core/patients/" class="uri">https://mimic.mit.edu/docs/iv/modules/core/patients/</a>) as a tibble <code>patients_tble</code> and only keep the patients who have a match in <code>icustays_tble</code> (according to <code>subject_id</code>).</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>  patients &lt;- read_csv(str_c(mimic_path, &quot;/core/patients.csv.gz&quot;))</code></pre>
+<pre class="r"><code>patients &lt;- read_csv(str_c(mimic_path, &quot;/core/patients.csv.gz&quot;))</code></pre>
 <pre><code>## Rows: 382278 Columns: 6
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -740,7 +747,6 @@ admissions_tble %&gt;%
 <ol start="2" style="list-style-type: decimal">
 <li><p>We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of <code>labevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>labevents_tble</code>.</p>
 <p>Hint: <code>labevents.csv.gz</code> is a data file too big to be read in by the <code>read_csv</code> function in its default setting. Utilize the <code>col_select</code> and <code>lazy</code> options in the <code>read_csv</code> function to reduce the memory burden.</p></li>
-<li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
 </ol>
 <p><strong>Solution:</strong> First, I used the lab item directory to create a list of the 10 items we want.</p>
 <pre class="r"><code>dlabitems_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/d_labitems.csv.gz&quot;)) %&gt;%
@@ -758,8 +764,25 @@ admissions_tble %&gt;%
     print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>dlabitems_tble$itemid</code></pre>
+</div>
+<div id="importing-labevents.csv.gz" class="section level1">
+<h1>importing labevents.csv.gz</h1>
 <p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>labevents_tble &lt;- labevents_tble %&gt;%
+<pre class="r"><code>labevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/labevents.csv.gz&quot;),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% dlabitems_tble$itemid) %&gt;%
+  print(width = Inf)</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</li>
+</ol>
+<pre class="r"><code>labevents_tble &lt;-
+  labevents_tble %&gt;%
     left_join(select(icustays_tble, subject_id, intime),
         by = c(&quot;subject_id&quot;)) %&gt;%
     filter (charttime &gt;= intime) %&gt;%
@@ -779,7 +802,6 @@ admissions_tble %&gt;%
 <li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
 <li><p>Summarize the lab measurements by appropriate numerics and graphics.</p></li>
 </ol>
-</div>
 <div id="q6.-vitals-from-charted-events" class="section level2">
 <h2>Q6. Vitals from charted events</h2>
 <p><code>chartevents.csv.gz</code> (<a href="https://mimic.mit.edu/docs/iv/modules/icu/chartevents/" class="uri">https://mimic.mit.edu/docs/iv/modules/icu/chartevents/</a>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The <code>itemid</code> variable indicates a single measurement type in the database. The <code>value</code> variable is the value measured for <code>itemid</code>. The first 10 lines of <code>chartevents.csv.gz</code> are</p>
@@ -833,8 +855,23 @@ admissions_tble %&gt;%
     print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>ditems_tble$itemid</code></pre>
+</div>
+</div>
+<div id="importing-chartevents.csv.gz" class="section level1">
+<h1>importing chartevents.csv.gz</h1>
 <p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>chartevents_tble &lt;- chartevents_tble %&gt;%
+<pre class="r"><code>chartevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/chartevents.csv.gz&quot;),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% ditems_tble$itemid) %&gt;%
+  print(width = Inf)</code></pre>
+<pre class="r"><code>chartevents_tble &lt;-
+  chartevents_tble %&gt;%
     left_join(select(icustays_tble, subject_id, intime),
         by = c(&quot;subject_id&quot;)) %&gt;%
     filter (charttime &gt;= intime) %&gt;%
@@ -852,7 +889,6 @@ admissions_tble %&gt;%
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize these vital measurements by appropriate numerics and graphics.</li>
 </ol>
-</div>
 <div id="q7.-putting-things-together" class="section level2">
 <h2>Q7. Putting things together</h2>
 <p>Let us create a tibble <code>mimic_icu_cohort</code> for all ICU stays, where rows are</p>
@@ -898,6 +934,7 @@ mimic_icu_cohort &lt;- left_join(icustays_tble, admissions_tble,
 <li><p><code>thirty_day_mort</code> vs first vital measurements</p></li>
 <li><p><code>thirty_day_mort</code> vs first ICU unit</p></li>
 </ul>
+</div>
 </div>
 
 

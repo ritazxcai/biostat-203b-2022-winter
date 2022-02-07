@@ -124,7 +124,8 @@ icustays_tble %>%
 
 The following code takes shorter to run and gives the exact same results:
 ```{r, eval=T}
-icustays_tble %>%
+icustays_tble <-
+  icustays_tble %>%
   arrange(icustays_tble, desc(subject_id)) %>%
   group_by(subject_id) %>%
   filter(rank(intime) < 2) %>%
@@ -169,7 +170,7 @@ admissions_tble
 
 **Solution:**
 ```{r}
-admissions_tble <- admissions_tble %>%
+admissions_tble <-
   semi_join(admissions_tble, icustays_tble,
             by = c("subject_id", "hadm_id")) %>%
   print(width = Inf)
@@ -244,7 +245,7 @@ system(
 
 **Solution:**
 ```{r}
-  patients <- read_csv(str_c(mimic_path, "/core/patients.csv.gz"))
+patients <- read_csv(str_c(mimic_path, "/core/patients.csv.gz"))
   patients_tble <- as_tibble(patients)
 
 ```
@@ -327,7 +328,6 @@ zcat /mnt/mimiciv/1.0/hosp/labevents.csv.gz | awk 'END { print NR }'
 
     Hint: `labevents.csv.gz` is a data file too big to be read in by the `read_csv` function in its default setting. Utilize the `col_select` and `lazy` options in the `read_csv` function to reduce the memory burden.
 
-3. Further restrict `labevents_tble` to the first lab measurement during the ICU stay.
 
 **Solution:**
 First, I used the lab item directory to create a list of the 10 items we want.
@@ -352,9 +352,30 @@ dlabitems_tble$itemid
 
 ```
 
+
+# importing labevents.csv.gz #
 **Note:** This takes very long to run.
 ```{r, eval=F}
-labevents_tble <- labevents_tble %>%
+labevents_tble <- read_csv(str_c(mimic_path, "/hosp/labevents.csv.gz"),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% dlabitems_tble$itemid) %>%
+  print(width = Inf)
+
+
+```
+
+
+3. Further restrict `labevents_tble` to the first lab measurement during the ICU stay.
+
+```{r, eval=F}
+labevents_tble <-
+  labevents_tble %>%
 	left_join(select(icustays_tble, subject_id, intime),
 		by = c("subject_id")) %>%
 	filter (charttime >= intime) %>%
@@ -427,9 +448,26 @@ ditems_tble$itemid
 ```
 
 
+# importing chartevents.csv.gz #
 **Note:** This takes very long to run.
 ```{r, eval=F}
-chartevents_tble <- chartevents_tble %>%
+chartevents_tble <- read_csv(str_c(mimic_path, "/icu/chartevents.csv.gz"),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% ditems_tble$itemid) %>%
+  print(width = Inf)
+```
+
+
+
+```{r, eval=F}
+chartevents_tble <-
+  chartevents_tble %>%
 	left_join(select(icustays_tble, subject_id, intime),
 		by = c("subject_id")) %>%
 	filter (charttime >= intime) %>%
