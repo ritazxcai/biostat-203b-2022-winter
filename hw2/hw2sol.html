@@ -869,10 +869,10 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
         ~str_to_lower(dlabitems_tble$label)
         ) %&gt;%
     rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
-    print(width = Inf)</code></pre>
-<ol start="3" style="list-style-type: decimal">
-<li><p>Further restrict <code>labevents_tble</code> to the first lab measurement during the ICU stay.</p></li>
-<li><p>Summarize the lab measurements by appropriate numerics and graphics.</p></li>
+    print(width = Inf) %&gt;%
+  write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Summarize the lab measurements by appropriate numerics and graphics.</li>
 </ol>
 <div id="q6.-vitals-from-charted-events" class="section level2">
 <h2>Q6. Vitals from charted events</h2>
@@ -957,7 +957,8 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
         vars(as.character(ditems_tble$itemid)),
         ~str_to_lower(ditems_tble$label)
         ) %&gt;%
-    print(width = Inf)</code></pre>
+    print(width = Inf) %&gt;%
+  write_rds(&quot;charteventsb.tble.rds&quot;)</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize these vital measurements by appropriate numerics and graphics.</li>
 </ol>

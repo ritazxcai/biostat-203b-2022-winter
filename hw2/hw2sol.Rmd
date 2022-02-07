@@ -401,10 +401,9 @@ labevents_tble <-
 		~str_to_lower(dlabitems_tble$label)
 		) %>%
 	rename(wbc = `white blood cells`, calcium = `calcium, total`) %>%
-	print(width = Inf)
+	print(width = Inf) %>%
+  write_rds("labevents.tble.rds")
 ```
-
-3. Further restrict `labevents_tble` to the first lab measurement during the ICU stay.
 
 4. Summarize the lab measurements by appropriate numerics and graphics. 
 
@@ -492,7 +491,8 @@ chartevents_tble <-
 		vars(as.character(ditems_tble$itemid)),
 		~str_to_lower(ditems_tble$label)
 		) %>%
-	print(width = Inf)
+	print(width = Inf) %>%
+  write_rds("charteventsb.tble.rds")
 ```
 
 3. Summarize these vital measurements by appropriate numerics and graphics. 
