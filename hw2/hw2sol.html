@@ -348,7 +348,13 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 <li>Import <code>icustatys.csv.gz</code> as a tibble <code>icustays_tble</code>.</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="r"><code>icustays &lt;- read_csv(str_c(mimic_path, &quot;/icu/icustays.csv.gz&quot;))</code></pre>
+<pre class="r"><code>icustays_tble &lt;- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, &quot;/icu/icustays.csv.gz&quot;
+  )
+)) %&gt;%
+  print (width = Inf)</code></pre>
 <pre><code>## Rows: 76540 Columns: 8
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -358,23 +364,32 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>icustays_tble &lt;- as_tibble(icustays)
-
-icustays_tble</code></pre>
 <pre><code>## # A tibble: 76,540 × 8
-##    subject_id  hadm_id  stay_id first_careunit last_careunit intime             
-##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;         &lt;dttm&gt;             
-##  1   17867402 24528534 31793211 Trauma SICU (… Trauma SICU … 2154-03-03 04:11:00
-##  2   14435996 28960964 31983544 Trauma SICU (… Trauma SICU … 2150-06-19 17:57:00
-##  3   17609946 27385897 33183475 Trauma SICU (… Trauma SICU … 2138-02-05 18:54:00
-##  4   18966770 23483021 34131444 Trauma SICU (… Trauma SICU … 2123-10-25 10:35:00
-##  5   12776735 20817525 34547665 Neuro Stepdown Neuro Stepdo… 2200-07-12 00:33:00
-##  6   10215159 24283593 34569476 Trauma SICU (… Trauma SICU … 2124-09-20 15:05:29
-##  7   14489052 26516390 35056286 Trauma SICU (… Trauma SICU … 2118-10-26 10:33:56
-##  8   15914763 28906020 36909804 Trauma SICU (… Trauma SICU … 2176-12-14 12:00:00
-##  9   16256226 20013290 39289362 Neuro Stepdown Neuro Stepdo… 2150-12-20 16:09:08
-## 10   19194449 21641999 39387567 Coronary Care… Coronary Car… 2123-11-12 02:53:35
-## # … with 76,530 more rows, and 2 more variables: outtime &lt;dttm&gt;, los &lt;dbl&gt;</code></pre>
+##    subject_id  hadm_id  stay_id first_careunit          
+##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                   
+##  1   17867402 24528534 31793211 Trauma SICU (TSICU)     
+##  2   14435996 28960964 31983544 Trauma SICU (TSICU)     
+##  3   17609946 27385897 33183475 Trauma SICU (TSICU)     
+##  4   18966770 23483021 34131444 Trauma SICU (TSICU)     
+##  5   12776735 20817525 34547665 Neuro Stepdown          
+##  6   10215159 24283593 34569476 Trauma SICU (TSICU)     
+##  7   14489052 26516390 35056286 Trauma SICU (TSICU)     
+##  8   15914763 28906020 36909804 Trauma SICU (TSICU)     
+##  9   16256226 20013290 39289362 Neuro Stepdown          
+## 10   19194449 21641999 39387567 Coronary Care Unit (CCU)
+##    last_careunit            intime              outtime               los
+##    &lt;chr&gt;                    &lt;dttm&gt;              &lt;dttm&gt;              &lt;dbl&gt;
+##  1 Trauma SICU (TSICU)      2154-03-03 04:11:00 2154-03-04 18:16:56 1.59 
+##  2 Trauma SICU (TSICU)      2150-06-19 17:57:00 2150-06-22 18:33:54 3.03 
+##  3 Trauma SICU (TSICU)      2138-02-05 18:54:00 2138-02-15 12:42:05 9.74 
+##  4 Trauma SICU (TSICU)      2123-10-25 10:35:00 2123-10-25 18:59:47 0.351
+##  5 Neuro Stepdown           2200-07-12 00:33:00 2200-07-13 16:44:40 1.67 
+##  6 Trauma SICU (TSICU)      2124-09-20 15:05:29 2124-09-21 22:06:58 1.29 
+##  7 Trauma SICU (TSICU)      2118-10-26 10:33:56 2118-10-26 20:28:10 0.413
+##  8 Trauma SICU (TSICU)      2176-12-14 12:00:00 2176-12-17 11:47:01 2.99 
+##  9 Neuro Stepdown           2150-12-20 16:09:08 2150-12-21 14:58:40 0.951
+## 10 Coronary Care Unit (CCU) 2123-11-12 02:53:35 2123-11-12 13:52:03 0.457
+## # … with 76,530 more rows</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>How many unique <code>subject_id</code>? Can a <code>subject_id</code> have multiple ICU stays?</li>
 </ol>
@@ -391,7 +406,8 @@ icustays_tble</code></pre>
 <li>For each <code>subject_id</code>, let’s only keep the first ICU stay in the tibble <code>icustays_tble</code>.</li>
 </ol>
 <p><strong>Solution:</strong> The following code uses <code>slice_min</code> command, which takes longer to run:</p>
-<pre class="r"><code>icustays_tble %&gt;%
+<pre class="r"><code>icustays_tble &lt;-
+  icustays_tble %&gt;%
   arrange(icustays_tble, desc(subject_id)) %&gt;%
   group_by(subject_id) %&gt;%
   slice_min(order_by = intime) %&gt;%
@@ -402,9 +418,9 @@ icustays_tble</code></pre>
   arrange(icustays_tble, desc(subject_id)) %&gt;%
   group_by(subject_id) %&gt;%
   filter(rank(intime) &lt; 2) %&gt;%
+  ungroup() %&gt;%
   print(width = Inf)</code></pre>
 <pre><code>## # A tibble: 53,150 × 8
-## # Groups:   subject_id [53,150]
 ##    subject_id  hadm_id  stay_id first_careunit                                  
 ##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                                           
 ##  1   10000032 29079034 39553978 Medical Intensive Care Unit (MICU)              
