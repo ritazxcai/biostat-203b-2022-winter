@@ -177,7 +177,8 @@ pre code {
 <li><a href="#q3.-admission-data">Q3. <code>admission</code> data</a></li>
 <li><a href="#q4.-patients-data">Q4. <code>patients</code> data</a></li>
 <li><a href="#q5.-lab-results">Q5. Lab results</a></li>
-<li><a href="#importing-labevents.csv.gz">importing labevents.csv.gz</a>
+<li><a href="#importing-labevents.csv.gz">importing labevents.csv.gz</a></li>
+<li><a href="#since-rds-file-exists-we-can-directly-read-from-it-to-save-run-time">Since rds file exists, we can directly read from it to save run time:</a>
 <ul>
 <li><a href="#q6.-vitals-from-charted-events">Q6. Vitals from charted events</a></li>
 </ul></li>
@@ -871,6 +872,37 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
     rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
+</div>
+<div id="since-rds-file-exists-we-can-directly-read-from-it-to-save-run-time" class="section level1">
+<h1>Since rds file exists, we can directly read from it to save run time:</h1>
+<pre class="r"><code>labevents_tble &lt;- read_rds(&quot;labevents.tble.rds&quot;) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 52,544 × 11
+##    subject_id bicarbonate calcium chloride creatinine glucose magnesium
+##         &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
+##  1   10000032          21     9.3      102        0.5     115       2.3
+##  2   10000980          23     9.2      103        2.2     144       2  
+##  3   10001217          23     8.2      104        0.4     113       1.9
+##  4   10001725          24     9.1      106        0.8     146       1.5
+##  5   10001884          33     9.8       96        1.1     148       2.2
+##  6   10002013          23     8.2      109        1.1      98       2.1
+##  7   10002155          25     8.8      106        0.9      95       2  
+##  8   10002223          26     8.7      102        0.8      88       2  
+##  9   10002348          23     9.4      107        0.8     127       1.6
+## 10   10002428          20     7.4       98        0.8      99       1.4
+##    potassium sodium hematocrit   wbc
+##        &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+##  1       4.7    132       34.8   4.1
+##  2       4.2    139       30.8   5.4
+##  3       3.6    138       33.6  19  
+##  4       3.9    140       39.1  17  
+##  5       4      136       36    18.4
+##  6       4      140       28.6  18.2
+##  7       4.5    139       37.9   5.5
+##  8       3.9    138       32.5  10.1
+##  9       4.8    142       39.3   4.3
+## 10       3.9    129       28.7  22.4
+## # … with 52,534 more rows</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Summarize the lab measurements by appropriate numerics and graphics.</li>
 </ol>

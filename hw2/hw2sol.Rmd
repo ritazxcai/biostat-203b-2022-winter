@@ -404,6 +404,13 @@ labevents_tble <-
 	print(width = Inf) %>%
   write_rds("labevents.tble.rds")
 ```
+# Since rds file exists, we can directly read from it to save run time:
+```{r, eval=T}
+labevents_tble <- read_rds("labevents.tble.rds") %>%
+  print(width = Inf)
+```
+
+
 
 4. Summarize the lab measurements by appropriate numerics and graphics. 
 
