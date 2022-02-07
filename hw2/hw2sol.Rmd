@@ -541,6 +541,12 @@ mimic_icu_cohort <-
   write_rds("mimic_icu_cohort.rds")
 ```
 
+```{r, eval=F}
+rm(admissions)
+rm(patients)
+rm(icustays)
+
+```
 
 
 ## Q8. Exploratory data analysis (EDA)
