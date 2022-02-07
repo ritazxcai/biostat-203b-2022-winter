@@ -185,6 +185,7 @@ admissions_tble <- admissions_tble %>%
 - admission hour (anything unusual?)  
 
 **Solution:**
+`admission year`
 ```{r, eval=F}
 admissions_tble %>%
 	mutate(dur = as.duration(dischtime - admittime)) %>%
@@ -197,6 +198,7 @@ admissions_tble %>%
 		) %>%
 	print(width = Inf)
 
+
 admissions_tble %>%
   mutate(dur = as.duration(dischtime - admittime)) %>%
 	ggplot() +
@@ -204,7 +206,25 @@ admissions_tble %>%
 	labs(x = "hospital stay duration (in years)")
 
 ```
+`admission month`
+```{r}
+admissions_tble %>%
+	mutate(dur = as.duration(dischtime - admittime)) %>%
+	summarise(
+		mean_d_month = mean(dur / 2629800),
+		sd_d_month = sd(dur / 2629800),
+		min_d_month = min(dur / 2629800),
+		max_d_month = max(dur / 2629800)
+		) %>%
+	print(width = Inf)
 
+
+admissions_tble %>%
+  mutate(dur = as.duration(dischtime - admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = dur / 2629800)) +
+	labs(x = "hospital stay duration (in months)")
+```
 
 ## Q4. `patients` data
 
