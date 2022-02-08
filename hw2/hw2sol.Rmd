@@ -37,6 +37,9 @@ In this exercise, we use tidyverse (ggpot2, dplyr, etc) to explore the [MIMIC-IV
 system(str_c("tree -s -L 2 ", shQuote(mimic_path)), intern = TRUE)
 ```
 
+**Note:** Some r code chunks are with option `eval=F` to save the time of knitting the rmd to html. The option can be changed to `eval=T` to check the functionality of the code.
+
+
 ## Q1. `read.csv` (base R) vs `read_csv` (tidyverse) vs `fread` (data.table)
 
 There are quite a few utilities in R for reading plain text data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three programs: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the popular data.table package. 
@@ -498,7 +501,12 @@ chartevents_tble <- chartevents_tble %>%
 		vars(as.character(ditems_tble$itemid)),
 		~str_to_lower(ditems_tble$label)
 		) %>%
-	print(width = Inf) %>%
+	print(width = Inf)
+
+# get rid of the space in between name of vital measurements
+spaceless <- function(x) {colnames(x) <- gsub(" ", "_", colnames(x));x}
+chartevents_tble <- spaceless(chartevents_tble) %>%
+  print(width = Inf) %>%
   write_rds("chartevents.tble.rds")
 ```
 
@@ -510,7 +518,52 @@ chartevents_tble <- read_rds("chartevents.tble.rds") %>%
 
 3. Summarize these vital measurements by appropriate numerics and graphics.
 
+```{r}
+summary(chartevents_tble)
+```
 
+`heart_rate`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = heart_rate)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,300))
+```
+
+`non_invasive_blood_pressure_systolic`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = non_invasive_blood_pressure_systolic)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,270))
+```
+
+`non_invasive_blood_pressure_mean`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = non_invasive_blood_pressure_mean)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,225))
+```
+
+`respiratory_rate`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = respiratory_rate)) + 
+  geom_boxplot() +
+  scale_x_continuous(limits = c(0,200))
+```
+
+`temperature_fahrenheit`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = temperature_fahrenheit)) + 
+  geom_boxplot() +
+  scale_x_continuous(limits = c(0,110))
+```
 
 ## Q7. Putting things together
 
@@ -544,12 +597,7 @@ mimic_icu_cohort <- icustays_tble %>%
   mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
 	mutate(thirty_day_mort = adm_to_dth  <= 2592000) %>%
   select(-adm_to_dth) %>%
-	print(width = Inf)
-
-# get rid of the space in between name of vital measurements
-spaceless <- function(x) {colnames(x) <- gsub(" ", "_", colnames(x));x}
-mimic_icu_cohort <- spaceless(mimic_icu_cohort) %>%
-  print(width = Inf) %>%
+	print(width = Inf) %>%
   write_rds("mimic_icu_cohort.rds")
 ```
 **Note:** the variable `thirty_day_mort`, which stands for "thirty-days mortality", is a dummy variable with `1` = "died within 30 days of hospital admission" and `0` = "did not die within 30 days of hospital admission".
@@ -641,8 +689,8 @@ ggplot(data = mimic_icu_cohort) +
 ```{r}
 tapply(mimic_icu_cohort$bicarbonate, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
-                                              y = bicarbonate)) + 
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort, y = bicarbonate)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -801,7 +849,7 @@ ggplot(data = mimic_icu_cohort,
 ```
 
 **Note:**
-Apparently, the data-set needs to be further filtered: some observations were so large/small that they do not even make sense to people without in-depth knowledge in health sciences. For example, the variable  `non_invasive_blood_pressure_systolic` has a minimum value of 9.0 and maximum value of 12262.0 for the "TRUE" group of `thirty_day_mort` (subjects who died within 30 days of hospital admission). Same for `heart_rate`: the maximum value of the "FALSE" group of `thirty_day_mort` is 941.0, which should definitely be treated as an error and discarded. In conclusion, the summary statistics of the data-set `mimic_uci_cohort` is a helpful tool enabling us to check the validity of data imported. The abnormal data should be further looked into and removed if necessary.
+Apparently, the data-set needs to be further filtered: some observations were so large/small that they do not even make sense to people without in-depth knowledge in health sciences. For example, the variable  `non_invasive_blood_pressure_systolic` has a minimum value of 9.0 and maximum value of 12262.0 for the "TRUE" group of `thirty_day_mort` (subjects who died within 30 days of hospital admission). Same for `heart_rate`: the maximum value of the "FALSE" group of `thirty_day_mort` is 941.0, which should definitely be treated as an error and discarded. In conclusion, the summary statistics of the data-set `mimic_icu_cohort` is a helpful tool enabling us to check the validity of data imported. The abnormal data should be further looked into and removed if necessary.
 
 
 
