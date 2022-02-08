@@ -484,8 +484,7 @@ chartevents_tble <- read_csv(str_c(
 
 2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay.
 ```{r, eval=F}
-chartevents_tble <-
-  chartevents_tble %>%
+chartevents_tble <- chartevents_tble %>%
 	left_join(select(icustays_tble, subject_id, intime),
 		by = c("subject_id")) %>%
 	filter (charttime >= intime) %>%
@@ -530,7 +529,7 @@ and columns contain at least following variables
 
 
 **Solution:**
-```{r, eval=T}
+```{r, eval=F}
 mimic_icu_cohort <- icustays_tble %>%
   left_join(admissions_tble,
 			by = c("subject_id", "hadm_id")) %>%
@@ -545,10 +544,24 @@ mimic_icu_cohort <- icustays_tble %>%
   mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
 	mutate(thirty_day_mort = adm_to_dth  <= 2592000) %>%
   select(-adm_to_dth) %>%
-	print(width = Inf) %>%
+	print(width = Inf)
+
+# get rid of the space in between name of vital measurements
+spaceless <- function(x) {colnames(x) <- gsub(" ", "_", colnames(x));x}
+mimic_icu_cohort <- spaceless(mimic_icu_cohort) %>%
+  print(width = Inf) %>%
   write_rds("mimic_icu_cohort.rds")
 ```
 **Note:** the variable `thirty_day_mort`, which stands for "thirty-days mortality", is a dummy variable with `1` = "died within 30 days of hospital admission" and `0` = "did not die within 30 days of hospital admission".
+
+
+**Since rds file exists, we can directly read from it to save run time:**
+```{r}
+mimic_icu_cohort <- read_rds("mimic_icu_cohort.rds") %>%
+  print(width = Inf)
+```
+
+
 
 
 ## Q8. Exploratory data analysis (EDA)
@@ -707,6 +720,80 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = wbc)) +
   geom_boxplot() +
   coord_flip()
 ```
+
+
+
+**`thirty_day_mort` vs. first vital measurements:**
+
+`heart_rate`:
+```{r}
+tapply(mimic_icu_cohort$heart_rate, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort, y = heart_rate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`non_invasive_blood_pressure_systolic`:
+```{r}
+tapply(mimic_icu_cohort$non_invasive_blood_pressure_systolic,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = non_invasive_blood_pressure_systolic)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,300))
+```
+
+`non_invasive_blood_pressure_mean`:
+```{r}
+tapply(mimic_icu_cohort$non_invasive_blood_pressure_mean,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = non_invasive_blood_pressure_mean)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,250))
+```
+
+`respiratory_rate`:
+```{r}
+tapply(mimic_icu_cohort$respiratory_rate,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = respiratory_rate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`temperature_fahrenheit`:
+```{r}
+tapply(mimic_icu_cohort$temperature_fahrenheit,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = temperature_fahrenheit)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
