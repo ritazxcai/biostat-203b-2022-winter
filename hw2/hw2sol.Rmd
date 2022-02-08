@@ -786,8 +786,8 @@ ggplot(data = mimic_icu_cohort,
 ```
 
 
-
-
+**Note:**
+Apparently, the data-set needs to be further filtered: some observations were so large/small that they do not even make sense to people without in-depth knowledge in health sciences. For example, the variable  `non_invasive_blood_pressure_systolic` has a minimum value of 9.0 and maximum value of 12262.0 for the "TRUE" group of `thirty_day_mort` (subjects who died within 30 days of hospital admission). Same for `heart_rate`: the maximum value of the "FALSE" group of `thirty_day_mort` is 941.0, which should definitely be treated as an error and discarded. In conclusion, the summary statistics of the data-set `mimic_uci_cohort` is a helpful tool enabling us to check the validity of data imported. The abnormal data should be further looked into and removed if necessary.
 
 
 
