@@ -414,11 +414,101 @@ labevents_tble <- read_rds("labevents.tble.rds") %>%
   print(width = Inf)
 ```
 
-
-
 4. Summarize the lab measurements by appropriate numerics and graphics. 
 
+```{r}
+summary(labevents_tble)
+```
 
+`bicarbonate`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = bicarbonate)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,50))
+```
+
+`calcium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = calcium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,45))
+```
+
+`chloride`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = chloride)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(50,160))
+```
+
+`creatinine`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = creatinine)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,40))
+```
+
+`glucose`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = glucose)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,2500))
+```
+
+`magnesium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = magnesium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,50))
+```
+
+`potassium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = potassium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,15))
+```
+
+`sodium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = sodium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(90,200))
+```
+
+`hematocrit`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = hematocrit)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,70))
+```
+
+`wbc`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = wbc)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,600))
+```
 
 
 
