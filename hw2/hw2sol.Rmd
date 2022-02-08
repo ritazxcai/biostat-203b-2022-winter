@@ -48,29 +48,42 @@ Which function is fastest? Is there difference in the (default) parsed data type
 
 For later questions, we stick to the tidyverse. 
 
-**Solution:** 
+**Solution:**
+`read_csv`:
 ```{r, eval=F}
   read_csv(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
   print(width = Inf)
-
-```
-
-```{r}
-  system.time({read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
-
 ```
 
 ```{r, eval=F}
+  system.time({read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
+```
+
+
+`fread`:
+```{r, eval=F}
   fread(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
   print(width = Inf)
-
 ```
 
-```{r}
+```{r, eval=F}
   system.time({fread(str_c(mimic_path, "/core/admissions.csv.gz"))})
-
 ```
-The fastest method is the `fread` by data.table package in R.
+
+
+`read.csv` (in Base R):
+```{r, eval=F}
+  read.csv(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
+```
+
+```{r, eval=F}
+  system.time({read.csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
+```
+
+
+The `read.csv` command takes 42.346 seconds to read the file. The `fread` command takes 0.776 seconds. The `read_csv` command takes 1.859 seconds.
+Thus, the fastest method is the `fread` command by data.table package in R.
 
 
 ## Q2. ICU stays
