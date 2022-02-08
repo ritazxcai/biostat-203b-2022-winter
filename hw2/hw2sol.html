@@ -177,16 +177,9 @@ pre code {
 <li><a href="#q3.-admission-data">Q3. <code>admission</code> data</a></li>
 <li><a href="#q4.-patients-data">Q4. <code>patients</code> data</a></li>
 <li><a href="#q5.-lab-results">Q5. Lab results</a></li>
-<li><a href="#importing-labevents.csv.gz">importing labevents.csv.gz</a></li>
-<li><a href="#since-rds-file-exists-we-can-directly-read-from-it-to-save-run-time">Since rds file exists, we can directly read from it to save run time:</a>
-<ul>
 <li><a href="#q6.-vitals-from-charted-events">Q6. Vitals from charted events</a></li>
-</ul></li>
-<li><a href="#importing-chartevents.csv.gz">importing chartevents.csv.gz</a>
-<ul>
 <li><a href="#q7.-putting-things-together">Q7. Putting things together</a></li>
 <li><a href="#q8.-exploratory-data-analysis-eda">Q8. Exploratory data analysis (EDA)</a></li>
-</ul></li>
 </ul>
 </div>
 
@@ -251,7 +244,7 @@ library(tidyverse)</code></pre>
 if (str_detect(os, &quot;Linux&quot;)) {
   mimic_path &lt;- &quot;/mnt/mimiciv/1.0&quot;
 } else if (str_detect(os, &quot;macOS&quot;)) {
-  mimic_path &lt;- &quot;/Users/huazhou/Documents/Box Sync/MIMIC/mimic-iv-1.0&quot;
+  mimic_path &lt;- &quot;/Users/rita/Desktop/grad/WINTER22/Biostat203B/mimic-iv-1.0&quot;
 }</code></pre>
 <p>In this exercise, we use tidyverse (ggpot2, dplyr, etc) to explore the <a href="https://mimic.mit.edu/docs/iv/">MIMIC-IV</a> data introduced in <a href="https://ucla-biostat-203b.github.io/2022winter/hw/hw1/hw1.html">homework 1</a> and to build a cohort of ICU stays.</p>
 <pre class="r"><code># tree -s -L 2 /Users/huazhou/Documents/Box\ Sync/MIMIC/mimic-iv-1.0
@@ -637,15 +630,18 @@ print(width = Inf)</code></pre>
         min_d_year = min(dur / 31557600),
         max_d_year = max(dur / 31557600)
         ) %&gt;%
-    print(width = Inf)
-
-
-admissions_tble %&gt;%
+    print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 1 × 4
+##   mean_d_year sd_d_year min_d_year max_d_year
+##         &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+## 1      0.0258    0.0295  0.0000171       1.28</code></pre>
+<pre class="r"><code>admissions_tble %&gt;%
   mutate(dur = as.duration(dischtime - admittime)) %&gt;%
     ggplot() +
     geom_histogram(mapping = aes(x = dur / 31557600)) +
     labs(x = &quot;hospital stay duration (in years)&quot;)</code></pre>
-<p><code>admission month</code></p>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="data:image/png;base64,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" width="672" /> <code>admission month</code></p>
 <pre class="r"><code>admissions_tble %&gt;%
     mutate(dur = as.duration(dischtime - admittime)) %&gt;%
     summarise(
@@ -837,11 +833,9 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
     print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>dlabitems_tble$itemid</code></pre>
-</div>
-<div id="importing-labevents.csv.gz" class="section level1">
-<h1>importing labevents.csv.gz</h1>
-<p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>labevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/hosp/labevents.csv.gz&quot;),
+<p><strong>Importing <code>labevents_filtered_itemid.csv.gz</code></strong> <strong>Note:</strong> This takes very long to run.</p>
+<pre class="r"><code>labevents_tble &lt;- read_csv(str_c(
+  mimic_path, &quot;/hosp/labevents_filtered_itemid.csv.gz&quot;),
       col_select = c(subject_id, itemid, charttime, valuenum),
       col_types = cols_only(subject_id = col_double(), 
                             itemid = col_double(), 
@@ -872,9 +866,7 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
     rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
-</div>
-<div id="since-rds-file-exists-we-can-directly-read-from-it-to-save-run-time" class="section level1">
-<h1>Since rds file exists, we can directly read from it to save run time:</h1>
+<p><strong>Since rds file exists, we can directly read from it to save run time:</strong></p>
 <pre class="r"><code>labevents_tble &lt;- read_rds(&quot;labevents.tble.rds&quot;) %&gt;%
   print(width = Inf)</code></pre>
 <pre><code>## # A tibble: 52,544 × 11
@@ -906,6 +898,7 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
 <ol start="4" style="list-style-type: decimal">
 <li>Summarize the lab measurements by appropriate numerics and graphics.</li>
 </ol>
+</div>
 <div id="q6.-vitals-from-charted-events" class="section level2">
 <h2>Q6. Vitals from charted events</h2>
 <p><code>chartevents.csv.gz</code> (<a href="https://mimic.mit.edu/docs/iv/modules/icu/chartevents/" class="uri">https://mimic.mit.edu/docs/iv/modules/icu/chartevents/</a>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The <code>itemid</code> variable indicates a single measurement type in the database. The <code>value</code> variable is the value measured for <code>itemid</code>. The first 10 lines of <code>chartevents.csv.gz</code> are</p>
@@ -945,8 +938,7 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
 ##  [9] &quot;220052,Arterial Blood Pressure mean,ABPm,chartevents,Routine Vital Signs,mmHg,Numeric,,&quot;         
 ## [10] &quot;220056,Arterial Blood Pressure Alarm - Low,ABP Alarm - Low,chartevents,Alarms,mmHg,Numeric,,&quot;</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</p></li>
-<li><p>Further restrict <code>chartevents_tble</code> to the first vital measurement during the ICU stay.</p></li>
+<li>We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items for the patients in <code>icustays_tble</code> as a tibble <code>chartevents_tble</code>.</li>
 </ol>
 <p><strong>Solution:</strong> First, I used the item directory to create a list of the 5 items we want:</p>
 <pre class="r"><code>ditems_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/d_items.csv.gz&quot;)) %&gt;%
@@ -959,12 +951,9 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
     print(width = Inf)</code></pre>
 <p>Checking the list of items we want:</p>
 <pre class="r"><code>ditems_tble$itemid</code></pre>
-</div>
-</div>
-<div id="importing-chartevents.csv.gz" class="section level1">
-<h1>importing chartevents.csv.gz</h1>
-<p><strong>Note:</strong> This takes very long to run.</p>
-<pre class="r"><code>chartevents_tble &lt;- read_csv(str_c(mimic_path, &quot;/icu/chartevents.csv.gz&quot;),
+<p><strong>Importing <code>chartevents_filtered_itemid.csv.gz</code></strong> <strong>Note:</strong> This takes very long to run.</p>
+<pre class="r"><code>chartevents_tble &lt;- read_csv(str_c(
+  mimic_path, &quot;/icu/chartevents_filtered_itemid.csv.gz&quot;),
       col_select = c(subject_id, itemid, charttime, valuenum),
       col_types = cols_only(subject_id = col_double(), 
                             itemid = col_double(), 
@@ -974,6 +963,9 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
   semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
   filter(itemid %in% ditems_tble$itemid) %&gt;%
   print(width = Inf)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Further restrict <code>chartevents_tble</code> to the first vital measurement during the ICU stay.</li>
+</ol>
 <pre class="r"><code>chartevents_tble &lt;-
   chartevents_tble %&gt;%
     left_join(select(icustays_tble, subject_id, intime),
@@ -991,9 +983,51 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
         ) %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;chartevents.tble.rds&quot;)</code></pre>
+<p><strong>Since rds file exists, we can directly read from it to save run time:</strong></p>
+<pre class="r"><code>chartevents_tble &lt;- read_rds(&quot;chartevents.tble.rds&quot;) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 53,150 × 6
+##    subject_id `heart rate` `non invasive blood pressure systolic`
+##         &lt;dbl&gt;        &lt;dbl&gt;                                  &lt;dbl&gt;
+##  1   10000032           91                                     84
+##  2   10000980           77                                    150
+##  3   10001217           86                                    151
+##  4   10001725           55                                     73
+##  5   10001884           38                                    180
+##  6   10002013           80                                    104
+##  7   10002155           68                                    126
+##  8   10002223          100                                    123
+##  9   10002348           72                                    129
+## 10   10002428          124                                     87
+##    `non invasive blood pressure mean` `respiratory rate`
+##                                 &lt;dbl&gt;              &lt;dbl&gt;
+##  1                                 56                 24
+##  2                                 92                 23
+##  3                                104                 18
+##  4                                 59                 19
+##  5                                 46                 10
+##  6                                 77                 14
+##  7                                 78                 18
+##  8                                 80                 29
+##  9                                 85                 14
+## 10                                 53                 25
+##    `temperature fahrenheit`
+##                       &lt;dbl&gt;
+##  1                     98.7
+##  2                     98  
+##  3                     98.5
+##  4                     97.7
+##  5                     98.1
+##  6                     97.2
+##  7                     95.9
+##  8                     98.6
+##  9                     97.9
+## 10                    103. 
+## # … with 53,140 more rows</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Summarize these vital measurements by appropriate numerics and graphics.</li>
 </ol>
+</div>
 <div id="q7.-putting-things-together" class="section level2">
 <h2>Q7. Putting things together</h2>
 <p>Let us create a tibble <code>mimic_icu_cohort</code> for all ICU stays, where rows are</p>
@@ -1030,9 +1064,6 @@ mimic_icu_cohort &lt;-
     select(-dth_days) %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;mimic_icu_cohort.rds&quot;)</code></pre>
-<pre class="r"><code>rm(admissions)
-rm(patients)
-rm(icustays)</code></pre>
 </div>
 <div id="q8.-exploratory-data-analysis-eda" class="section level2">
 <h2>Q8. Exploratory data analysis (EDA)</h2>
@@ -1043,7 +1074,6 @@ rm(icustays)</code></pre>
 <li><p><code>thirty_day_mort</code> vs first vital measurements</p></li>
 <li><p><code>thirty_day_mort</code> vs first ICU unit</p></li>
 </ul>
-</div>
 </div>
 
 

@@ -26,7 +26,7 @@ os <- sessionInfo()$running
 if (str_detect(os, "Linux")) {
   mimic_path <- "/mnt/mimiciv/1.0"
 } else if (str_detect(os, "macOS")) {
-  mimic_path <- "/Users/huazhou/Documents/Box Sync/MIMIC/mimic-iv-1.0"
+  mimic_path <- "/Users/rita/Desktop/grad/WINTER22/Biostat203B/mimic-iv-1.0"
 }
 ```
 
@@ -193,7 +193,7 @@ admissions_tble <-
 
 **Solution:**
 `admission year`
-```{r, eval=F}
+```{r}
 admissions_tble %>%
 	mutate(dur = as.duration(dischtime - admittime)) %>%
   filter(dur > 0) %>%
@@ -364,10 +364,11 @@ dlabitems_tble$itemid
 ```
 
 
-# importing labevents.csv.gz #
+**Importing `labevents_filtered_itemid.csv.gz`**
 **Note:** This takes very long to run.
 ```{r, eval=F}
-labevents_tble <- read_csv(str_c(mimic_path, "/hosp/labevents.csv.gz"),
+labevents_tble <- read_csv(str_c(
+  mimic_path, "/hosp/labevents_filtered_itemid.csv.gz"),
       col_select = c(subject_id, itemid, charttime, valuenum),
       col_types = cols_only(subject_id = col_double(), 
                             itemid = col_double(), 
@@ -404,7 +405,7 @@ labevents_tble <-
 	print(width = Inf) %>%
   write_rds("labevents.tble.rds")
 ```
-# Since rds file exists, we can directly read from it to save run time:
+**Since rds file exists, we can directly read from it to save run time:**
 ```{r, eval=T}
 labevents_tble <- read_rds("labevents.tble.rds") %>%
   print(width = Inf)
@@ -443,8 +444,6 @@ system(
 
 1. We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of `chartevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `chartevents_tble`.
 
-2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay.
-
 **Solution:**
 First, I used the item directory to create a list of the 5 items we want:
 ```{r, eval=F}
@@ -465,10 +464,11 @@ ditems_tble$itemid
 ```
 
 
-# importing chartevents.csv.gz #
+**Importing `chartevents_filtered_itemid.csv.gz`**
 **Note:** This takes very long to run.
 ```{r, eval=F}
-chartevents_tble <- read_csv(str_c(mimic_path, "/icu/chartevents.csv.gz"),
+chartevents_tble <- read_csv(str_c(
+  mimic_path, "/icu/chartevents_filtered_itemid.csv.gz"),
       col_select = c(subject_id, itemid, charttime, valuenum),
       col_types = cols_only(subject_id = col_double(), 
                             itemid = col_double(), 
@@ -482,6 +482,7 @@ chartevents_tble <- read_csv(str_c(mimic_path, "/icu/chartevents.csv.gz"),
 
 
 
+2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay.
 ```{r, eval=F}
 chartevents_tble <-
   chartevents_tble %>%
@@ -501,6 +502,13 @@ chartevents_tble <-
 	print(width = Inf) %>%
   write_rds("chartevents.tble.rds")
 ```
+
+**Since rds file exists, we can directly read from it to save run time:**
+```{r}
+chartevents_tble <- read_rds("chartevents.tble.rds") %>%
+  print(width = Inf)
+```
+
 
 3. Summarize these vital measurements by appropriate numerics and graphics. 
 
@@ -541,12 +549,6 @@ mimic_icu_cohort <-
   write_rds("mimic_icu_cohort.rds")
 ```
 
-```{r, eval=F}
-rm(admissions)
-rm(patients)
-rm(icustays)
-
-```
 
 
 ## Q8. Exploratory data analysis (EDA)
