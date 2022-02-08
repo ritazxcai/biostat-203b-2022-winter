@@ -543,7 +543,7 @@ mimic_icu_cohort <- icustays_tble %>%
 	mutate(age_adm = anchor_age + year(admittime) - anchor_year) %>%
   filter(age_adm > 18)%>%
   mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
-	mutate(thirty_day_mort = (adm_to_dth  <= 2592000)*1) %>%
+	mutate(thirty_day_mort = adm_to_dth  <= 2592000) %>%
   select(-adm_to_dth) %>%
 	print(width = Inf) %>%
   write_rds("mimic_icu_cohort.rds")
@@ -566,6 +566,14 @@ Summarize following information using appropriate numerics or graphs.
 **Solutions:**
 ```{r}
 summary(mimic_icu_cohort)
+
+mimic_icu_cohort %>%
+ggplot() + 
+  stat_count(mapping = aes(x = thirty_day_mort))
+
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort) %>%
+  summarise(count = n())
 ```
 
 **`thirty_day_mort` vs. Demographic variables:**
@@ -605,6 +613,101 @@ ggplot(data = mimic_icu_cohort) +
 ggplot(data = mimic_icu_cohort) + 
   geom_bar(mapping = aes(x = thirty_day_mort, fill = anchor_year_group), position = "dodge")
 ```
+
+
+
+**`thirty_day_mort` vs. first lab measurements:**
+
+`bicarbonate`:
+```{r}
+tapply(mimic_icu_cohort$bicarbonate, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = bicarbonate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`calcium`:
+```{r}
+tapply(mimic_icu_cohort$calcium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = calcium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`chloride`:
+```{r}
+tapply(mimic_icu_cohort$chloride, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = chloride)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`creatinine`:
+```{r}
+tapply(mimic_icu_cohort$creatinine, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = creatinine)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`glucose`:
+```{r}
+tapply(mimic_icu_cohort$glucose, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = glucose)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`magnesium`:
+```{r}
+tapply(mimic_icu_cohort$magnesium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = magnesium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`potassium`:
+```{r}
+tapply(mimic_icu_cohort$potassium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = potassium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`sodium`:
+```{r}
+tapply(mimic_icu_cohort$sodium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = sodium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`hematocrit`:
+```{r}
+tapply(mimic_icu_cohort$hematocrit, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = hematocrit)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`wbc`:
+```{r}
+tapply(mimic_icu_cohort$wbc, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = wbc)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
 
 
 
