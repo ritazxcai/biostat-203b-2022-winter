@@ -594,37 +594,43 @@ mimic_icu_cohort %>%
 `thirty_day_mort` vs. `ethnicity`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = ethnicity), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = ethnicity), position = "dodge")
 ```
 
 `thirty_day_mort` vs. `language`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = language), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = language), position = "dodge")
 ```
 
 `thirty_day_mort` vs. `insurance`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = insurance), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = insurance), position = "dodge")
 ```
 
 `thirty_day_mort` vs. `marital_status`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = marital_status), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = marital_status), position = "dodge")
 ```
 
 `thirty_day_mort` vs. `gender`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = gender), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = gender), position = "dodge")
 ```
 
 `thirty_day_mort` vs. `anchor_year_group`:
 ```{r}
 ggplot(data = mimic_icu_cohort) + 
-  geom_bar(mapping = aes(x = thirty_day_mort, fill = anchor_year_group), position = "dodge")
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = anchor_year_group), position = "dodge")
 ```
 
 
@@ -635,7 +641,8 @@ ggplot(data = mimic_icu_cohort) +
 ```{r}
 tapply(mimic_icu_cohort$bicarbonate, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = bicarbonate)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = bicarbonate)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -644,7 +651,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = bicarbona
 ```{r}
 tapply(mimic_icu_cohort$calcium, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = calcium)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = calcium)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -653,7 +661,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = calcium))
 ```{r}
 tapply(mimic_icu_cohort$chloride, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = chloride)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = chloride)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -662,7 +671,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = chloride)
 ```{r}
 tapply(mimic_icu_cohort$creatinine, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = creatinine)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = creatinine)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -671,7 +681,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = creatinin
 ```{r}
 tapply(mimic_icu_cohort$glucose, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = glucose)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = glucose)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -680,7 +691,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = glucose))
 ```{r}
 tapply(mimic_icu_cohort$magnesium, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = magnesium)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = magnesium)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -689,7 +701,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = magnesium
 ```{r}
 tapply(mimic_icu_cohort$potassium, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = potassium)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = potassium)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -698,7 +711,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = potassium
 ```{r}
 tapply(mimic_icu_cohort$sodium, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = sodium)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = sodium)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -707,7 +721,8 @@ ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = sodium)) 
 ```{r}
 tapply(mimic_icu_cohort$hematocrit, mimic_icu_cohort$thirty_day_mort, summary)
 
-ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = hematocrit)) + 
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = hematocrit)) + 
   geom_boxplot() +
   coord_flip()
 ```
@@ -785,18 +800,118 @@ ggplot(data = mimic_icu_cohort,
   coord_flip()
 ```
 
-
 **Note:**
 Apparently, the data-set needs to be further filtered: some observations were so large/small that they do not even make sense to people without in-depth knowledge in health sciences. For example, the variable  `non_invasive_blood_pressure_systolic` has a minimum value of 9.0 and maximum value of 12262.0 for the "TRUE" group of `thirty_day_mort` (subjects who died within 30 days of hospital admission). Same for `heart_rate`: the maximum value of the "FALSE" group of `thirty_day_mort` is 941.0, which should definitely be treated as an error and discarded. In conclusion, the summary statistics of the data-set `mimic_uci_cohort` is a helpful tool enabling us to check the validity of data imported. The abnormal data should be further looked into and removed if necessary.
 
 
 
+**`thirty_day_mort` vs first ICU unit:**
 
+`admission_type`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = admission_type), position = "dodge")
+```
 
+`admission_location`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = admission_location), position = "dodge")
+```
 
+`discharge_location`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = discharge_location), position = "dodge")
+```
 
+`intime`
+```{r}
+tapply(mimic_icu_cohort$intime,
+       mimic_icu_cohort$thirty_day_mort, summary)
 
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = intime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
 
+`outtime`
+```{r}
+tapply(mimic_icu_cohort$outtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = outtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`los` (length of stay, in days)
+```{r}
+tapply(mimic_icu_cohort$los,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = los)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`deathtime`
+```{r}
+tapply(mimic_icu_cohort$deathtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = deathtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+**Note**: since the subjects in "FALSE" group of `thirty_day_mort` did not die within 30 days of hospitalization, the summary statistics are all not applicable.
+
+`admittime` (admission time)
+```{r}
+tapply(mimic_icu_cohort$admittime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = admittime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`dischtime` (discharged time)
+```{r}
+tapply(mimic_icu_cohort$dischtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = dischtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`age_adm` (age at hospital admission, in years)
+```{r}
+tapply(mimic_icu_cohort$age_adm,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = age_adm)) + 
+  geom_boxplot() +
+  coord_flip()
+```
 
 
 
