@@ -209,7 +209,7 @@ admissions_tble <-
 
 **Solution:**
 `admission year`
-```{r}
+```{r, eval=F}
 admissions_tble %>%
 	mutate(dur = as.duration(dischtime - admittime)) %>%
   filter(dur > 0) %>%
@@ -229,10 +229,33 @@ admissions_tble %>%
 	labs(x = "hospital stay duration (in years)")
 
 ```
-`admission month`
+
 ```{r}
 admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_year = mean(year(d)),
+		sd_d_year = sd(year(d)),
+		min_d_year = min(year(d)),
+		max_d_year = max(year(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = year(d))) +
+	labs(x = "hospital stay admission time (in years)")
+```
+
+
+`admission month`
+```{r, eval = F}
+admissions_tble %>%
 	mutate(dur = as.duration(dischtime - admittime)) %>%
+  filter(dur > 0) %>%
 	summarise(
 		mean_d_month = mean(dur / 2629800),
 		sd_d_month = sd(dur / 2629800),
@@ -248,6 +271,94 @@ admissions_tble %>%
 	geom_histogram(mapping = aes(x = dur / 2629800)) +
 	labs(x = "hospital stay duration (in months)")
 ```
+
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_month = mean(month(d)),
+		sd_d_month = sd(month(d)),
+		min_d_month = min(month(d)),
+		max_d_month = max(month(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = month(d))) +
+	labs(x = "hospital stay admission time (in months)")
+```
+
+
+`admission month day`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_mday = mean(mday(d)),
+		sd_d_mday = sd(mday(d)),
+		min_d_mday = min(mday(d)),
+		max_d_mday = max(mday(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = mday(d))) +
+	labs(x = "hospital stay admission time (in month days)")
+```
+
+
+`admission week day`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_wday = mean(wday(d)),
+		sd_d_wday = sd(wday(d)),
+		min_d_wday = min(wday(d)),
+		max_d_wday = max(wday(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = wday(d))) +
+	labs(x = "hospital stay admission time (in week days)")
+```
+
+
+`admission hour`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_hour = mean(hour(d)),
+		sd_d_hour = sd(hour(d)),
+		min_d_hour = min(hour(d)),
+		max_d_hour = max(hour(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = hour(d))) +
+	labs(x = "hospital stay admission time (in hour)")
+```
+
+
 
 ## Q4. `patients` data
 
