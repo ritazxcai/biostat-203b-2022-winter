@@ -1047,9 +1047,8 @@ semi_join(patients_tble, icustays_tble, by = &quot;subject_id&quot;) %&gt;%
 <li>first vital measurements during ICU stay</li>
 <li>an indicator variable <code>thirty_day_mort</code> whether the patient died within 30 days of hospital admission (30 day mortality)</li>
 </ul>
-<pre class="r"><code># Merging tibbles &amp; adding variable `thirty_day_mort` #
-mimic_icu_cohort &lt;-
-  icustays_tble %&gt;%
+<p><strong>Solution:</strong></p>
+<pre class="r"><code>mimic_icu_cohort &lt;- icustays_tble %&gt;%
   left_join(admissions_tble,
             by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
     left_join(patients_tble,
@@ -1058,12 +1057,148 @@ mimic_icu_cohort &lt;-
         by = c(&quot;subject_id&quot;)) %&gt;%
     left_join(chartevents_tble,
         by = c(&quot;subject_id&quot;)) %&gt;%
-  filter(anchor_age &gt; 18) %&gt;%
-    mutate(dth_days = as.duration(deathtime - admittime)) %&gt;%
-    mutate(thirty_day_mort = (dth_days/86400 &lt;= 30) * 1) %&gt;%
-    select(-dth_days) %&gt;%
+    mutate(age_adm = anchor_age + year(admittime) - anchor_year) %&gt;%
+  filter(age_adm &gt; 18)%&gt;%
+  mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %&gt;%
+    mutate(thirty_day_mort = (adm_to_dth  &lt;= 2592000)*1) %&gt;%
+  select(-age_adm, -adm_to_dth) %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;mimic_icu_cohort.rds&quot;)</code></pre>
+<pre><code>## # A tibble: 53,065 × 42
+##    subject_id  hadm_id  stay_id first_careunit                                  
+##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                                           
+##  1   10000032 29079034 39553978 Medical Intensive Care Unit (MICU)              
+##  2   10000980 26913865 39765666 Medical Intensive Care Unit (MICU)              
+##  3   10001217 24597018 37067082 Surgical Intensive Care Unit (SICU)             
+##  4   10001725 25563031 31205490 Medical/Surgical Intensive Care Unit (MICU/SICU)
+##  5   10001884 26184834 37510196 Medical Intensive Care Unit (MICU)              
+##  6   10002013 23581541 39060235 Cardiac Vascular Intensive Care Unit (CVICU)    
+##  7   10002155 23822395 33685454 Coronary Care Unit (CCU)                        
+##  8   10002223 22494570 39638202 Trauma SICU (TSICU)                             
+##  9   10002348 22725460 32610785 Neuro Intermediate                              
+## 10   10002428 28662225 33987268 Medical Intensive Care Unit (MICU)              
+##    last_careunit                                    intime             
+##    &lt;chr&gt;                                            &lt;dttm&gt;             
+##  1 Medical Intensive Care Unit (MICU)               2180-07-23 14:00:00
+##  2 Medical Intensive Care Unit (MICU)               2189-06-27 08:42:00
+##  3 Surgical Intensive Care Unit (SICU)              2157-11-20 19:18:02
+##  4 Medical/Surgical Intensive Care Unit (MICU/SICU) 2110-04-11 15:52:22
+##  5 Medical Intensive Care Unit (MICU)               2131-01-11 04:20:05
+##  6 Cardiac Vascular Intensive Care Unit (CVICU)     2160-05-18 10:00:53
+##  7 Coronary Care Unit (CCU)                         2129-08-04 12:45:00
+##  8 Trauma SICU (TSICU)                              2158-01-15 08:01:49
+##  9 Neuro Intermediate                               2112-11-30 23:24:00
+## 10 Medical Intensive Care Unit (MICU)               2156-04-12 16:24:18
+##    outtime               los admittime           dischtime          
+##    &lt;dttm&gt;              &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 2180-07-23 23:50:47 0.410 2180-07-23 12:35:00 2180-07-25 17:55:00
+##  2 2189-06-27 20:38:27 0.498 2189-06-27 07:38:00 2189-07-03 03:00:00
+##  3 2157-11-21 22:08:00 1.12  2157-11-18 22:56:00 2157-11-25 18:00:00
+##  4 2110-04-12 23:59:56 1.34  2110-04-11 15:08:00 2110-04-14 15:00:00
+##  5 2131-01-20 08:27:30 9.17  2131-01-07 20:39:00 2131-01-20 05:15:00
+##  6 2160-05-19 17:33:33 1.31  2160-05-18 07:45:00 2160-05-23 13:30:00
+##  7 2129-08-10 17:02:38 6.18  2129-08-04 12:44:00 2129-08-18 16:53:00
+##  8 2158-01-16 15:19:24 1.30  2158-01-15 08:00:00 2158-01-20 19:29:00
+##  9 2112-12-10 18:25:13 9.79  2112-11-30 22:22:00 2112-12-10 17:56:00
+## 10 2156-04-17 15:57:08 4.98  2156-04-12 14:16:00 2156-04-29 16:26:00
+##    deathtime           admission_type              admission_location    
+##    &lt;dttm&gt;              &lt;chr&gt;                       &lt;chr&gt;                 
+##  1 NA                  EW EMER.                    EMERGENCY ROOM        
+##  2 NA                  EW EMER.                    EMERGENCY ROOM        
+##  3 NA                  EW EMER.                    EMERGENCY ROOM        
+##  4 NA                  EW EMER.                    PACU                  
+##  5 2131-01-20 05:15:00 OBSERVATION ADMIT           EMERGENCY ROOM        
+##  6 NA                  SURGICAL SAME DAY ADMISSION PHYSICIAN REFERRAL    
+##  7 NA                  EW EMER.                    PROCEDURE SITE        
+##  8 NA                  EW EMER.                    EMERGENCY ROOM        
+##  9 NA                  OBSERVATION ADMIT           TRANSFER FROM HOSPITAL
+## 10 NA                  EW EMER.                    EMERGENCY ROOM        
+##    discharge_location           insurance language marital_status
+##    &lt;chr&gt;                        &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;         
+##  1 HOME                         Medicaid  ENGLISH  WIDOWED       
+##  2 HOME HEALTH CARE             Medicare  ENGLISH  MARRIED       
+##  3 HOME HEALTH CARE             Other     ?        MARRIED       
+##  4 HOME                         Other     ENGLISH  MARRIED       
+##  5 DIED                         Medicare  ENGLISH  MARRIED       
+##  6 HOME HEALTH CARE             Medicare  ENGLISH  SINGLE        
+##  7 CHRONIC/LONG TERM ACUTE CARE Other     ENGLISH  MARRIED       
+##  8 HOME                         Other     ENGLISH  &lt;NA&gt;          
+##  9 HOME HEALTH CARE             Medicare  ENGLISH  SINGLE        
+## 10 SKILLED NURSING FACILITY     Medicare  ENGLISH  WIDOWED       
+##    ethnicity              edregtime           edouttime          
+##    &lt;chr&gt;                  &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 WHITE                  2180-07-23 05:54:00 2180-07-23 14:00:00
+##  2 BLACK/AFRICAN AMERICAN 2189-06-27 06:25:00 2189-06-27 08:42:00
+##  3 WHITE                  2157-11-18 17:38:00 2157-11-19 01:24:00
+##  4 WHITE                  NA                  NA                 
+##  5 BLACK/AFRICAN AMERICAN 2131-01-07 13:36:00 2131-01-07 22:13:00
+##  6 OTHER                  NA                  NA                 
+##  7 WHITE                  2129-08-04 11:00:00 2129-08-04 12:35:00
+##  8 UNABLE TO OBTAIN       2158-01-15 06:49:00 2158-01-15 07:36:00
+##  9 WHITE                  2112-11-30 15:08:00 2112-11-30 23:24:00
+## 10 WHITE                  2156-04-12 09:56:00 2156-04-12 17:11:00
+##    hospital_expire_flag gender anchor_age anchor_year anchor_year_group
+##                   &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;            
+##  1                    0 F              52        2180 2014 - 2016      
+##  2                    0 F              73        2186 2008 - 2010      
+##  3                    0 F              55        2157 2011 - 2013      
+##  4                    0 F              46        2110 2011 - 2013      
+##  5                    1 F              68        2122 2008 - 2010      
+##  6                    0 F              53        2156 2008 - 2010      
+##  7                    0 F              80        2128 2008 - 2010      
+##  8                    0 M              21        2158 2008 - 2010      
+##  9                    0 F              77        2112 2017 - 2019      
+## 10                    0 F              80        2155 2011 - 2013      
+##    dod        bicarbonate calcium chloride creatinine glucose magnesium
+##    &lt;date&gt;           &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
+##  1 NA                  21     9.3      102        0.5     115       2.3
+##  2 NA                  23     9.2      103        2.2     144       2  
+##  3 NA                  23     8.2      104        0.4     113       1.9
+##  4 NA                  24     9.1      106        0.8     146       1.5
+##  5 2131-01-20          33     9.8       96        1.1     148       2.2
+##  6 NA                  23     8.2      109        1.1      98       2.1
+##  7 2131-03-10          25     8.8      106        0.9      95       2  
+##  8 NA                  26     8.7      102        0.8      88       2  
+##  9 NA                  23     9.4      107        0.8     127       1.6
+## 10 NA                  20     7.4       98        0.8      99       1.4
+##    potassium sodium hematocrit   wbc `heart rate`
+##        &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;
+##  1       4.7    132       34.8   4.1           91
+##  2       4.2    139       30.8   5.4           77
+##  3       3.6    138       33.6  19             86
+##  4       3.9    140       39.1  17             55
+##  5       4      136       36    18.4           38
+##  6       4      140       28.6  18.2           80
+##  7       4.5    139       37.9   5.5           68
+##  8       3.9    138       32.5  10.1          100
+##  9       4.8    142       39.3   4.3           72
+## 10       3.9    129       28.7  22.4          124
+##    `non invasive blood pressure systolic` `non invasive blood pressure mean`
+##                                     &lt;dbl&gt;                              &lt;dbl&gt;
+##  1                                     84                                 56
+##  2                                    150                                 92
+##  3                                    151                                104
+##  4                                     73                                 59
+##  5                                    180                                 46
+##  6                                    104                                 77
+##  7                                    126                                 78
+##  8                                    123                                 80
+##  9                                    129                                 85
+## 10                                     87                                 53
+##    `respiratory rate` `temperature fahrenheit` thirty_day_mort
+##                 &lt;dbl&gt;                    &lt;dbl&gt;           &lt;dbl&gt;
+##  1                 24                     98.7               0
+##  2                 23                     98                 0
+##  3                 18                     98.5               0
+##  4                 19                     97.7               0
+##  5                 10                     98.1               1
+##  6                 14                     97.2               0
+##  7                 18                     95.9               0
+##  8                 29                     98.6               0
+##  9                 14                     97.9               0
+## 10                 25                    103.                0
+## # … with 53,055 more rows</code></pre>
+<p><strong>Note:</strong> the variable <code>thirty_day_mort</code>, which stands for “thirty-days mortality”, is a dummy variable with <code>1</code> = “died within 30 days of hospital admission” and <code>0</code> = “did not die within 30 days of hospital admission”.</p>
 </div>
 <div id="q8.-exploratory-data-analysis-eda" class="section level2">
 <h2>Q8. Exploratory data analysis (EDA)</h2>

@@ -528,11 +528,9 @@ and columns contain at least following variables
 - an indicator variable `thirty_day_mort` whether the patient died within 30 days of hospital admission (30 day mortality)
 
 
-
-```{r, eval=F}
-# Merging tibbles & adding variable `thirty_day_mort` #
-mimic_icu_cohort <-
-  icustays_tble %>%
+**Solution:**
+```{r, eval=T}
+mimic_icu_cohort <- icustays_tble %>%
   left_join(admissions_tble,
 			by = c("subject_id", "hadm_id")) %>%
 	left_join(patients_tble,
@@ -541,14 +539,15 @@ mimic_icu_cohort <-
 		by = c("subject_id")) %>%
 	left_join(chartevents_tble,
 		by = c("subject_id")) %>%
-  filter(anchor_age > 18) %>%
-	mutate(dth_days = as.duration(deathtime - admittime)) %>%
-	mutate(thirty_day_mort = (dth_days/86400 <= 30) * 1) %>%
-	select(-dth_days) %>%
+	mutate(age_adm = anchor_age + year(admittime) - anchor_year) %>%
+  filter(age_adm > 18)%>%
+  mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
+	mutate(thirty_day_mort = (adm_to_dth  <= 2592000)*1) %>%
+  select(-age_adm, -adm_to_dth) %>%
 	print(width = Inf) %>%
   write_rds("mimic_icu_cohort.rds")
 ```
-
+**Note:** the variable `thirty_day_mort`, which stands for "thirty-days mortality", is a dummy variable with `1` = "died within 30 days of hospital admission" and `0` = "did not die within 30 days of hospital admission".
 
 
 ## Q8. Exploratory data analysis (EDA)
