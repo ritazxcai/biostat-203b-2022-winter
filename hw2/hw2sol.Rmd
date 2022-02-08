@@ -509,8 +509,9 @@ chartevents_tble <- read_rds("chartevents.tble.rds") %>%
   print(width = Inf)
 ```
 
+3. Summarize these vital measurements by appropriate numerics and graphics.
 
-3. Summarize these vital measurements by appropriate numerics and graphics. 
+
 
 ## Q7. Putting things together
 
@@ -543,7 +544,7 @@ mimic_icu_cohort <- icustays_tble %>%
   filter(age_adm > 18)%>%
   mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
 	mutate(thirty_day_mort = (adm_to_dth  <= 2592000)*1) %>%
-  select(-age_adm, -adm_to_dth) %>%
+  select(-adm_to_dth) %>%
 	print(width = Inf) %>%
   write_rds("mimic_icu_cohort.rds")
 ```
@@ -561,4 +562,52 @@ Summarize following information using appropriate numerics or graphs.
 - `thirty_day_mort` vs first vital measurements
 
 - `thirty_day_mort` vs first ICU unit
+
+**Solutions:**
+```{r}
+summary(mimic_icu_cohort)
+```
+
+**`thirty_day_mort` vs. Demographic variables:**
+
+`thirty_day_mort` vs. `ethnicity`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = ethnicity), position = "dodge")
+```
+
+`thirty_day_mort` vs. `language`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = language), position = "dodge")
+```
+
+`thirty_day_mort` vs. `insurance`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = insurance), position = "dodge")
+```
+
+`thirty_day_mort` vs. `marital_status`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = marital_status), position = "dodge")
+```
+
+`thirty_day_mort` vs. `gender`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = gender), position = "dodge")
+```
+
+`thirty_day_mort` vs. `anchor_year_group`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort, fill = anchor_year_group), position = "dodge")
+```
+
+
+
+
+
 
