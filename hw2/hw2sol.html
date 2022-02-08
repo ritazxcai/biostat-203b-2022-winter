@@ -381,7 +381,8 @@ system(str_c(&quot;tree -s -L 2 &quot;, shQuote(mimic_path)), intern = TRUE)</co
 <li>How many unique <code>subject_id</code>? Can a <code>subject_id</code> have multiple ICU stays?</li>
 </ol>
 <p><strong>Solution:</strong></p>
-<pre class="bash"><code>zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, &#39;{ print $1 }&#39; | sort -u | wc -l
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz |
+awk -F, &#39;{ print $1 }&#39; | sort -u | wc -l
 </code></pre>
 <pre><code>## 53151</code></pre>
 <p>There are a total of 53151 unique subject IDs in the <code>icustays.csv.gz</code> file.</p>

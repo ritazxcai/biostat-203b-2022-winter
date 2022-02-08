@@ -117,7 +117,8 @@ icustays_tble <- as_tibble(
 
 **Solution:**
 ```{bash}
-zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, '{ print $1 }' | sort -u | wc -l
+zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz |
+awk -F, '{ print $1 }' | sort -u | wc -l
 
 ```
 There are a total of 53151 unique subject IDs in the `icustays.csv.gz` file.
