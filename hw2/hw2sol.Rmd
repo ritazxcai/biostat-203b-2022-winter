@@ -1,0 +1,1181 @@
+---
+title: "Biostat 203B Homework 2"
+subtitle: Due Feb 6 @ 11:59PM
+author: Zixuan Cai
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4 
+---
+
+Display machine information for reproducibility:
+```{r}
+sessionInfo()
+```
+
+```{r setup, message=T}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, cache.lazy = FALSE)
+library(tidyverse)
+library(data.table)
+library(lubridate)
+library(dplyr)
+```
+
+```{r}
+os <- sessionInfo()$running
+if (str_detect(os, "Linux")) {
+  mimic_path <- "/mnt/mimiciv/1.0"
+} else if (str_detect(os, "macOS")) {
+  mimic_path <- "/Users/rita/Desktop/grad/WINTER22/Biostat203B/mimic-iv-1.0"
+}
+```
+
+In this exercise, we use tidyverse (ggpot2, dplyr, etc) to explore the [MIMIC-IV](https://mimic.mit.edu/docs/iv/) data introduced in [homework 1](https://ucla-biostat-203b.github.io/2022winter/hw/hw1/hw1.html) and to build a cohort of ICU stays.
+
+```{r}
+# tree -s -L 2 /Users/huazhou/Documents/Box\ Sync/MIMIC/mimic-iv-1.0
+system(str_c("tree -s -L 2 ", shQuote(mimic_path)), intern = TRUE)
+```
+
+**Note:** Some r code chunks are with option `eval=F` to save the time of knitting the rmd to html. The option can be changed to `eval=T` to check the functionality of the code.
+
+
+## Q1. `read.csv` (base R) vs `read_csv` (tidyverse) vs `fread` (data.table)
+
+There are quite a few utilities in R for reading plain text data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three programs: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the popular data.table package. 
+
+Which function is fastest? Is there difference in the (default) parsed data types? (Hint: R function `system.time` measures run times.)
+
+For later questions, we stick to the tidyverse. 
+
+**Solution:**
+`read_csv`:
+```{r, eval=F}
+  read_csv(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
+```
+
+```{r, eval=F}
+  system.time({read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
+```
+
+
+`fread`:
+```{r, eval=F}
+  fread(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
+```
+
+```{r, eval=F}
+  system.time({fread(str_c(mimic_path, "/core/admissions.csv.gz"))})
+```
+
+
+`read.csv` (in Base R):
+```{r, eval=F}
+  read.csv(str_c(mimic_path, "/core/admissions.csv.gz")) %>%
+  print(width = Inf)
+```
+
+```{r, eval=F}
+  system.time({read.csv(str_c(mimic_path, "/core/admissions.csv.gz"))})
+```
+
+
+The `read.csv` command takes 42.346 seconds to read the file. The `fread` command takes 0.776 seconds. The `read_csv` command takes 1.859 seconds.
+Thus, the fastest method is the `fread` command by data.table package in R.
+
+
+## Q2. ICU stays
+
+`icustays.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/icustays/>) contains data about Intensive Care Units (ICU) stays. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/icu/icustays.csv.gz")), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+
+1. Import `icustatys.csv.gz` as a tibble `icustays_tble`.
+
+**Solution:**
+```{r}
+icustays_tble <- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, "/icu/icustays.csv.gz"
+  )
+)) %>%
+  print (width = Inf)
+```
+
+2. How many unique `subject_id`? Can a `subject_id` have multiple ICU stays? 
+
+**Solution:**
+```{bash}
+zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz |
+awk -F, '{ print $1 }' | sort -u | wc -l
+
+```
+There are a total of 53151 unique subject IDs in the `icustays.csv.gz` file.
+
+```{bash}
+zcat /mnt/mimiciv/1.0/icu/icustays.csv.gz | awk -F, '{ print $1 }' | wc -l
+
+```
+There can be multiple ICU stays for the same subject ID. If unique subject IDs are not sorted out, the total number of IDs are greater (=76541), meaning that multiple stays were recorded for some individuals.
+
+
+3. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`.
+
+**Solution:**
+The following code uses `slice_min` command, which takes longer to run:
+```{r, eval=F}
+icustays_tble <-
+  icustays_tble %>%
+  arrange(icustays_tble, desc(subject_id)) %>%
+  group_by(subject_id) %>%
+  slice_min(order_by = intime) %>%
+  print(width = Inf)
+```
+
+The following code takes shorter to run and gives the exact same results:
+```{r, eval=T}
+icustays_tble <-
+  icustays_tble %>%
+  arrange(icustays_tble, desc(subject_id)) %>%
+  group_by(subject_id) %>%
+  filter(rank(intime) < 2) %>%
+  ungroup() %>%
+  print(width = Inf)
+```
+
+This only extracts the unique subjects but not necessarily with the first ICU visits (do not run):
+```{r, eval=F}
+icustays_tble
+distinct(icustays_tble, subject_id, .keep_all = TRUE) %>%
+print(width = Inf)
+
+```
+## Q3. `admission` data
+
+Information of the patients admitted into hospital is available in `admissions.csv.gz`. See <https://mimic.mit.edu/docs/iv/modules/core/admissions/> for details of each field in this file. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/core/admissions.csv.gz")), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+
+1. Import `admissions.csv.gz` as a tibble `admissions_tble`.
+
+**Solution:**
+```{r}
+admissions_tble <- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, "/core/admissions.csv.gz"
+  )
+)) %>%
+  print (width = Inf)
+```
+
+
+2. Let's only keep the admissions that have a match in `icustays_tble` according to `subject_id` and `hadmi_id`.
+
+**Solution:**
+```{r}
+admissions_tble <-
+  semi_join(admissions_tble, icustays_tble,
+            by = c("subject_id", "hadm_id")) %>%
+  print(width = Inf)
+
+```
+
+3. Summarize the following variables by graphics. 
+
+- admission year  
+- admission month  
+- admission month day  
+- admission week day  
+- admission hour (anything unusual?)  
+
+**Solution:**
+`admission year`
+```{r, eval=F}
+admissions_tble %>%
+	mutate(dur = as.duration(dischtime - admittime)) %>%
+  filter(dur > 0) %>%
+	summarise(
+		mean_d_year = mean(dur / 31557600),
+		sd_d_year = sd(dur / 31557600),
+		min_d_year = min(dur / 31557600),
+		max_d_year = max(dur / 31557600)
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(dur = as.duration(dischtime - admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = dur / 31557600)) +
+	labs(x = "hospital stay duration (in years)")
+
+```
+
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_year = mean(year(d)),
+		sd_d_year = sd(year(d)),
+		min_d_year = min(year(d)),
+		max_d_year = max(year(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = year(d))) +
+	labs(x = "hospital stay admission time (in years)")
+```
+
+
+`admission month`
+```{r, eval = F}
+admissions_tble %>%
+	mutate(dur = as.duration(dischtime - admittime)) %>%
+  filter(dur > 0) %>%
+	summarise(
+		mean_d_month = mean(dur / 2629800),
+		sd_d_month = sd(dur / 2629800),
+		min_d_month = min(dur / 2629800),
+		max_d_month = max(dur / 2629800)
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(dur = as.duration(dischtime - admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = dur / 2629800)) +
+	labs(x = "hospital stay duration (in months)")
+```
+
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_month = mean(month(d)),
+		sd_d_month = sd(month(d)),
+		min_d_month = min(month(d)),
+		max_d_month = max(month(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = month(d))) +
+	labs(x = "hospital stay admission time (in months)")
+```
+
+
+`admission month day`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_mday = mean(mday(d)),
+		sd_d_mday = sd(mday(d)),
+		min_d_mday = min(mday(d)),
+		max_d_mday = max(mday(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = mday(d))) +
+	labs(x = "hospital stay admission time (in month days)")
+```
+
+
+`admission week day`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_wday = mean(wday(d)),
+		sd_d_wday = sd(wday(d)),
+		min_d_wday = min(wday(d)),
+		max_d_wday = max(wday(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = wday(d))) +
+	labs(x = "hospital stay admission time (in week days)")
+```
+
+
+`admission hour`
+```{r}
+admissions_tble %>%
+	mutate(d = ymd_hms(admittime)) %>%
+  filter(d > 0) %>%
+	summarise(
+		mean_d_hour = mean(hour(d)),
+		sd_d_hour = sd(hour(d)),
+		min_d_hour = min(hour(d)),
+		max_d_hour = max(hour(d))
+		) %>%
+	print(width = Inf)
+
+
+admissions_tble %>%
+  mutate(d = ymd_hms(admittime)) %>%
+	ggplot() +
+	geom_histogram(mapping = aes(x = hour(d))) +
+	labs(x = "hospital stay admission time (in hour)")
+```
+
+
+
+## Q4. `patients` data
+
+Patient information is available in `patients.csv.gz`. See <https://mimic.mit.edu/docs/iv/modules/core/patients/> for details of each field in this file. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/core/patients.csv.gz")), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+
+1. Import `patients.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/core/patients/>) as a tibble `patients_tble` and only keep the patients who have a match in `icustays_tble` (according to `subject_id`).
+
+**Solution:**
+```{r}
+patients_tble <- as_tibble(
+  read_csv(
+    str_c(
+      mimic_path, "/core/patients.csv.gz"
+  )
+)) %>%
+  print (width = Inf)
+```
+
+```{r}
+patients_tble <-
+semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  print(width = Inf)
+
+```
+
+2. Summarize variables `gender` and `anchor_age`, and explain any patterns you see.
+
+**Solution:** by `gender`:
+```{r}
+semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  group_by(gender) %>%
+  summarise(n = n())
+
+```
+
+
+`anchor_age` by `gender`:
+```{r}
+semi_join(patients_tble, icustays_tble, by = "subject_id") %>%
+  group_by(gender) %>%
+  summarise(mean_anchor_age = mean(anchor_age),
+            sd_anchor_age = sd(anchor_age),
+            min = min(anchor_age),
+            max = max(anchor_age))
+
+```
+
+Among the 53150 unique subjects, 23353 are females with mean anchor age of 64.822 and standard deviation of 17.930; the remaining 29797 subjects are males with mean anchor age of 62.488 and standard deviation of 16.632. We can see that female subjects have a higher average anchor age with a slightly wider spread compared to those of male subjects. Both genders have a minimum anchor age of 18 and maximum anchor age of 91.
+
+```{r, eval=F}
+patients_tble %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = anchor_age))
+```
+
+```{r, eval=F}
+patients_tble %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(y = anchor_age))
+```
+
+## Q5. Lab results
+
+`labevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/hosp/labevents/>) contains all laboratory measurements for patients. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/hosp/labevents.csv.gz")), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+`d_labitems.csv.gz` is the dictionary of lab measurements. 
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/hosp/d_labitems.csv.gz")), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+
+1. Find how many rows are in `labevents.csv.gz`.
+```{bash, eval=F}
+zcat /mnt/mimiciv/1.0/hosp/labevents.csv.gz | awk 'END { print NR }'
+
+```
+**Solution:** The number of rows is 122103668.
+
+2. We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), glucose (50931), magnesium (50960), and calcium (50893). Retrieve a subset of `labevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `labevents_tble`. 
+
+    Hint: `labevents.csv.gz` is a data file too big to be read in by the `read_csv` function in its default setting. Utilize the `col_select` and `lazy` options in the `read_csv` function to reduce the memory burden.
+
+
+**Solution:**
+First, I used the lab item directory to create a list of the 10 items we want.
+```{r, eval=F}
+dlabitems_tble <- read_csv(str_c(mimic_path, "/hosp/d_labitems.csv.gz")) %>%
+	filter(itemid %in% c(
+		50912,
+		50971,
+		50983,
+		50902,
+		50882,
+		51221,
+		51301,
+		50931,
+		50960,
+		50893)) %>%
+	print(width = Inf)
+```
+Checking the list of items we want:
+```{r, eval=F}
+dlabitems_tble$itemid
+
+```
+
+
+**Importing `labevents_filtered_itemid.csv.gz`**
+**Note:** This takes very long to run.
+```{r, eval=F}
+labevents_tble <- read_csv(str_c(
+  mimic_path, "/hosp/labevents_filtered_itemid.csv.gz"),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% dlabitems_tble$itemid) %>%
+  print(width = Inf)
+
+
+```
+
+
+3. Further restrict `labevents_tble` to the first lab measurement during the ICU stay.
+
+```{r, eval=F}
+labevents_tble <-
+  labevents_tble %>%
+	left_join(select(icustays_tble, subject_id, intime),
+		by = c("subject_id")) %>%
+	filter (charttime >= intime) %>%
+	group_by(subject_id, itemid) %>%
+	arrange(charttime, .by_group = TRUE) %>%
+	slice_head(n = 1) %>%
+	select(-charttime, -intime) %>%
+	ungroup %>%
+	pivot_wider(names_from = itemid, values_from = valuenum) %>%
+	rename_at(
+		vars(as.character(dlabitems_tble$itemid)),
+		~str_to_lower(dlabitems_tble$label)
+		) %>%
+	rename(wbc = `white blood cells`, calcium = `calcium, total`) %>%
+	print(width = Inf) %>%
+  write_rds("labevents.tble.rds")
+```
+**Since rds file exists, we can directly read from it to save run time:**
+```{r, eval=T}
+labevents_tble <- read_rds("labevents.tble.rds") %>%
+  print(width = Inf)
+```
+
+4. Summarize the lab measurements by appropriate numerics and graphics. 
+
+```{r}
+summary(labevents_tble)
+```
+
+`bicarbonate`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = bicarbonate)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,50))
+```
+
+`calcium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = calcium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,45))
+```
+
+`chloride`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = chloride)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(50,160))
+```
+
+`creatinine`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = creatinine)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,40))
+```
+
+`glucose`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = glucose)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,2500))
+```
+
+`magnesium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = magnesium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,50))
+```
+
+`potassium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = potassium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,15))
+```
+
+`sodium`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = sodium)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(90,200))
+```
+
+`hematocrit`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = hematocrit)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,70))
+```
+
+`wbc`
+```{r, eval=T}
+ggplot(data = labevents_tble,
+       mapping = aes(x = wbc)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,600))
+```
+
+
+
+## Q6. Vitals from charted events
+
+`chartevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `itemid` variable indicates a single measurement type in the database. The `value` variable is the value measured for `itemid`. The first 10 lines of `chartevents.csv.gz` are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/icu/chartevents.csv.gz")), 
+    " | head"), 
+  intern = TRUE
+)
+```
+`d_items.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/d_items/>) is the dictionary for the `itemid` in `chartevents.csv.gz`. 
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    shQuote(str_c(mimic_path, "/icu/d_items.csv.gz")), 
+    " | head"), 
+  intern = TRUE
+)
+```
+
+1. We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of `chartevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `chartevents_tble`.
+
+**Solution:**
+First, I used the item directory to create a list of the 5 items we want:
+```{r, eval=F}
+ditems_tble <- read_csv(str_c(mimic_path, "/icu/d_items.csv.gz")) %>%
+	filter(itemid %in% c(
+		220045,
+		220181,
+		220179,
+		223761,
+		220210)) %>%
+	print(width = Inf)
+```
+
+Checking the list of items we want:
+```{r, eval=F}
+ditems_tble$itemid
+
+```
+
+
+**Importing `chartevents_filtered_itemid.csv.gz`**
+**Note:** This takes very long to run.
+```{r, eval=F}
+chartevents_tble <- read_csv(str_c(
+  mimic_path, "/icu/chartevents_filtered_itemid.csv.gz"),
+      col_select = c(subject_id, itemid, charttime, valuenum),
+      col_types = cols_only(subject_id = col_double(), 
+                            itemid = col_double(), 
+                            charttime = col_datetime(), 
+                            valuenum = col_double()),
+      lazy = TRUE) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% ditems_tble$itemid) %>%
+  print(width = Inf)
+```
+
+
+
+2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay.
+```{r, eval=F}
+chartevents_tble <- chartevents_tble %>%
+	left_join(select(icustays_tble, subject_id, intime),
+		by = c("subject_id")) %>%
+	filter (charttime >= intime) %>%
+	group_by(subject_id, itemid) %>%
+	arrange(charttime, .by_group = TRUE) %>%
+	slice_head(n = 1) %>%
+	select(-charttime, -intime) %>%
+	ungroup %>%
+	pivot_wider(names_from = itemid, values_from = valuenum) %>%
+	rename_at(
+		vars(as.character(ditems_tble$itemid)),
+		~str_to_lower(ditems_tble$label)
+		) %>%
+	print(width = Inf)
+
+# get rid of the space in between name of vital measurements
+spaceless <- function(x) {colnames(x) <- gsub(" ", "_", colnames(x));x}
+chartevents_tble <- spaceless(chartevents_tble) %>%
+  print(width = Inf) %>%
+  write_rds("chartevents.tble.rds")
+```
+
+**Since rds file exists, we can directly read from it to save run time:**
+```{r}
+chartevents_tble <- read_rds("chartevents.tble.rds") %>%
+  print(width = Inf)
+```
+
+3. Summarize these vital measurements by appropriate numerics and graphics.
+
+```{r}
+summary(chartevents_tble)
+```
+
+`heart_rate`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = heart_rate)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,300))
+```
+
+`non_invasive_blood_pressure_systolic`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = non_invasive_blood_pressure_systolic)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,270))
+```
+
+`non_invasive_blood_pressure_mean`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = non_invasive_blood_pressure_mean)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_continuous(limits = c(0,225))
+```
+
+`respiratory_rate`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = respiratory_rate)) + 
+  geom_boxplot() +
+  scale_x_continuous(limits = c(0,200))
+```
+
+`temperature_fahrenheit`
+```{r, eval=F}
+ggplot(data = chartevents_tble,
+       mapping = aes(x = temperature_fahrenheit)) + 
+  geom_boxplot() +
+  scale_x_continuous(limits = c(0,110))
+```
+
+## Q7. Putting things together
+
+Let us create a tibble `mimic_icu_cohort` for all ICU stays, where rows are  
+
+- first ICU stay of each unique adult (age at admission > 18)
+
+and columns contain at least following variables  
+
+- all variables in `icustays.csv.gz`  
+- all variables in `admission.csv.gz`  
+- all variables in `patients.csv.gz`  
+- first lab measurements during ICU stay  
+- first vital measurements during ICU stay
+- an indicator variable `thirty_day_mort` whether the patient died within 30 days of hospital admission (30 day mortality)
+
+
+**Solution:**
+```{r, eval=F}
+mimic_icu_cohort <- icustays_tble %>%
+  left_join(admissions_tble,
+			by = c("subject_id", "hadm_id")) %>%
+	left_join(patients_tble,
+		by = c("subject_id")) %>%
+	left_join(labevents_tble,
+		by = c("subject_id")) %>%
+	left_join(chartevents_tble,
+		by = c("subject_id")) %>%
+	mutate(age_adm = anchor_age + year(admittime) - anchor_year) %>%
+  filter(age_adm > 18)%>%
+  mutate(adm_to_dth = ifelse(is.na(deathtime), Inf, deathtime - admittime)) %>%
+	mutate(thirty_day_mort = adm_to_dth  <= 2592000) %>%
+  select(-adm_to_dth) %>%
+	print(width = Inf) %>%
+  write_rds("mimic_icu_cohort.rds")
+```
+**Note:** the variable `thirty_day_mort`, which stands for "thirty-days mortality", is a dummy variable with `1` = "died within 30 days of hospital admission" and `0` = "did not die within 30 days of hospital admission".
+
+
+**Since rds file exists, we can directly read from it to save run time:**
+```{r}
+mimic_icu_cohort <- read_rds("mimic_icu_cohort.rds") %>%
+  print(width = Inf)
+```
+
+
+
+
+## Q8. Exploratory data analysis (EDA)
+
+Summarize following information using appropriate numerics or graphs.
+
+- `thirty_day_mort` vs demographic variables (ethnicity, language, insurance, marital_status, gender, age at hospital admission)
+
+- `thirty_day_mort` vs first lab measurements
+
+- `thirty_day_mort` vs first vital measurements
+
+- `thirty_day_mort` vs first ICU unit
+
+**Solutions:**
+```{r}
+summary(mimic_icu_cohort)
+
+mimic_icu_cohort %>%
+ggplot() + 
+  stat_count(mapping = aes(x = thirty_day_mort))
+
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort) %>%
+  summarise(count = n())
+```
+
+**`thirty_day_mort` vs. Demographic variables:**
+
+`thirty_day_mort` vs. `ethnicity`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = ethnicity), position = "dodge")
+```
+
+`thirty_day_mort` vs. `language`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = language), position = "dodge")
+```
+
+`thirty_day_mort` vs. `insurance`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = insurance), position = "dodge")
+```
+
+`thirty_day_mort` vs. `marital_status`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = marital_status), position = "dodge")
+```
+
+`thirty_day_mort` vs. `gender`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = gender), position = "dodge")
+```
+
+`thirty_day_mort` vs. `anchor_year_group`:
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = anchor_year_group), position = "dodge")
+```
+
+
+
+**`thirty_day_mort` vs. first lab measurements:**
+
+`bicarbonate`:
+```{r}
+tapply(mimic_icu_cohort$bicarbonate, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort, y = bicarbonate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`calcium`:
+```{r}
+tapply(mimic_icu_cohort$calcium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = calcium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`chloride`:
+```{r}
+tapply(mimic_icu_cohort$chloride, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = chloride)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`creatinine`:
+```{r}
+tapply(mimic_icu_cohort$creatinine, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = creatinine)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`glucose`:
+```{r}
+tapply(mimic_icu_cohort$glucose, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = glucose)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`magnesium`:
+```{r}
+tapply(mimic_icu_cohort$magnesium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = magnesium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`potassium`:
+```{r}
+tapply(mimic_icu_cohort$potassium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = potassium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`sodium`:
+```{r}
+tapply(mimic_icu_cohort$sodium, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = sodium)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`hematocrit`:
+```{r}
+tapply(mimic_icu_cohort$hematocrit, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort,
+                                              y = hematocrit)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`wbc`:
+```{r}
+tapply(mimic_icu_cohort$wbc, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort, mapping = aes(x = thirty_day_mort, y = wbc)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+
+
+**`thirty_day_mort` vs. first vital measurements:**
+
+`heart_rate`:
+```{r}
+tapply(mimic_icu_cohort$heart_rate, mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort, y = heart_rate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`non_invasive_blood_pressure_systolic`:
+```{r}
+tapply(mimic_icu_cohort$non_invasive_blood_pressure_systolic,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = non_invasive_blood_pressure_systolic)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,300))
+```
+
+`non_invasive_blood_pressure_mean`:
+```{r}
+tapply(mimic_icu_cohort$non_invasive_blood_pressure_mean,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = non_invasive_blood_pressure_mean)) + 
+  geom_boxplot() +
+  coord_flip() +
+  scale_y_continuous(limits = c(0,250))
+```
+
+`respiratory_rate`:
+```{r}
+tapply(mimic_icu_cohort$respiratory_rate,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = respiratory_rate)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`temperature_fahrenheit`:
+```{r}
+tapply(mimic_icu_cohort$temperature_fahrenheit,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = temperature_fahrenheit)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+**Note:**
+Apparently, the data-set needs to be further filtered: some observations were so large/small that they do not even make sense to people without in-depth knowledge in health sciences. For example, the variable  `non_invasive_blood_pressure_systolic` has a minimum value of 9.0 and maximum value of 12262.0 for the "TRUE" group of `thirty_day_mort` (subjects who died within 30 days of hospital admission). Same for `heart_rate`: the maximum value of the "FALSE" group of `thirty_day_mort` is 941.0, which should definitely be treated as an error and discarded. In conclusion, the summary statistics of the data-set `mimic_icu_cohort` is a helpful tool enabling us to check the validity of data imported. The abnormal data should be further looked into and removed if necessary.
+
+
+
+**`thirty_day_mort` vs first ICU unit:**
+
+`admission_type`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = admission_type), position = "dodge")
+```
+
+`admission_location`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = admission_location), position = "dodge")
+```
+
+`discharge_location`
+```{r}
+ggplot(data = mimic_icu_cohort) + 
+  geom_bar(mapping = aes(x = thirty_day_mort,
+                         fill = discharge_location), position = "dodge")
+```
+
+`intime`
+```{r}
+tapply(mimic_icu_cohort$intime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = intime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`outtime`
+```{r}
+tapply(mimic_icu_cohort$outtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = outtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`los` (length of stay, in days)
+```{r}
+tapply(mimic_icu_cohort$los,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = los)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`deathtime`
+```{r}
+tapply(mimic_icu_cohort$deathtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = deathtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+**Note**: since the subjects in "FALSE" group of `thirty_day_mort` did not die within 30 days of hospitalization, the summary statistics are all not applicable.
+
+`admittime` (admission time)
+```{r}
+tapply(mimic_icu_cohort$admittime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = admittime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`dischtime` (discharged time)
+```{r}
+tapply(mimic_icu_cohort$dischtime,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = dischtime)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+`age_adm` (age at hospital admission, in years)
+```{r}
+tapply(mimic_icu_cohort$age_adm,
+       mimic_icu_cohort$thirty_day_mort, summary)
+
+ggplot(data = mimic_icu_cohort,
+       mapping = aes(x = thirty_day_mort,
+                     y = age_adm)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+
+
+
+
