@@ -338,8 +338,131 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 <ol start="4" style="list-style-type: decimal">
 <li>Connect to the <code>admissions</code> table and only keep the patients who have a match in <code>icustays_tble</code> (according to <code>subject_id</code> and <code>hadm_id</code>).</li>
 </ol>
-<pre class="r"><code># # TODO
-# admissions_tble &lt;- </code></pre>
+<pre class="r"><code>admissions_tble &lt;-
+  tbl(con, &quot;admissions&quot;) %&gt;%
+  show_query() %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM `admissions`
+## # Source:   table&lt;admissions&gt; [?? x 15]
+## # Database: BigQueryConnection
+##    subject_id  hadm_id admittime           dischtime          
+##         &lt;int&gt;    &lt;int&gt; &lt;dttm&gt;              &lt;dttm&gt;             
+##  1   19940860 24902106 2130-12-31 09:19:00 2131-01-22 13:33:00
+##  2   17615674 27014468 2142-11-29 21:16:00 2143-01-13 12:28:00
+##  3   11786836 29132076 2117-05-04 19:28:00 2117-08-17 17:28:00
+##  4   19858751 23670116 2164-08-24 03:26:00 2164-09-05 12:10:00
+##  5   18186739 29454835 2121-07-28 15:25:00 2121-08-23 16:26:00
+##  6   17727602 24085356 2139-09-25 16:08:00 2139-09-30 12:00:00
+##  7   18863892 26824106 2181-10-21 01:06:00 2181-10-24 12:30:00
+##  8   19931040 27261054 2138-11-28 15:22:00 2138-12-11 13:45:00
+##  9   10831754 23383102 2122-04-29 13:11:00 2122-05-11 19:18:00
+## 10   16050270 23791681 2161-07-01 21:13:00 2161-07-05 15:45:00
+##    deathtime admission_type admission_location discharge_location
+##    &lt;dttm&gt;    &lt;chr&gt;          &lt;chr&gt;              &lt;chr&gt;             
+##  1 NA        URGENT         &lt;NA&gt;               HOME HEALTH CARE  
+##  2 NA        URGENT         &lt;NA&gt;               HOME              
+##  3 NA        URGENT         &lt;NA&gt;               HOME HEALTH CARE  
+##  4 NA        URGENT         &lt;NA&gt;               HOME HEALTH CARE  
+##  5 NA        URGENT         &lt;NA&gt;               HOME              
+##  6 NA        URGENT         &lt;NA&gt;               HOME              
+##  7 NA        URGENT         &lt;NA&gt;               HOME              
+##  8 NA        URGENT         &lt;NA&gt;               ACUTE HOSPITAL    
+##  9 NA        URGENT         &lt;NA&gt;               HOME              
+## 10 NA        URGENT         PROCEDURE SITE     HOME              
+##    insurance language marital_status ethnicity              edregtime
+##    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;                  &lt;dttm&gt;   
+##  1 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  2 Medicaid  ENGLISH  &lt;NA&gt;           BLACK/AFRICAN AMERICAN NA       
+##  3 Other     ENGLISH  &lt;NA&gt;           BLACK/AFRICAN AMERICAN NA       
+##  4 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##  5 Other     ENGLISH  &lt;NA&gt;           OTHER                  NA       
+##  6 Other     ENGLISH  &lt;NA&gt;           WHITE                  NA       
+##  7 Other     ENGLISH  &lt;NA&gt;           ASIAN                  NA       
+##  8 Other     ?        &lt;NA&gt;           OTHER                  NA       
+##  9 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+## 10 Other     ENGLISH  &lt;NA&gt;           UNKNOWN                NA       
+##    edouttime hospital_expire_flag
+##    &lt;dttm&gt;                   &lt;int&gt;
+##  1 NA                           0
+##  2 NA                           0
+##  3 NA                           0
+##  4 NA                           0
+##  5 NA                           0
+##  6 NA                           0
+##  7 NA                           0
+##  8 NA                           0
+##  9 NA                           0
+## 10 NA                           0
+## # … with more rows</code></pre>
+<pre class="r"><code>admissions_tble &lt;- admissions_tble %&gt;%
+  semi_join(icustays_tble,
+            by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # Source:   lazy query [?? x 15]
+## # Database: BigQueryConnection
+##    subject_id  hadm_id admittime           dischtime          
+##         &lt;int&gt;    &lt;int&gt; &lt;dttm&gt;              &lt;dttm&gt;             
+##  1   13197526 28853425 2111-03-01 02:22:00 2111-03-03 17:30:00
+##  2   15509304 26869731 2189-08-09 05:07:00 2189-08-11 15:00:00
+##  3   11958726 24320913 2117-12-20 13:42:00 2118-01-28 16:30:00
+##  4   16613161 23377835 2156-02-08 19:57:00 2156-02-18 13:02:00
+##  5   17969957 29045054 2181-06-04 19:38:00 2181-06-12 19:05:00
+##  6   15784035 24096846 2137-04-17 18:41:00 2137-04-24 16:14:00
+##  7   14854458 28121109 2174-09-01 19:17:00 2174-09-03 22:30:00
+##  8   14360149 25834248 2176-11-25 17:13:00 2176-12-17 00:00:00
+##  9   15840371 22995174 2187-05-04 20:43:00 2187-05-12 00:00:00
+## 10   18443449 22133024 2157-05-25 14:00:00 2157-05-30 19:07:00
+##    deathtime           admission_type admission_location    
+##    &lt;dttm&gt;              &lt;chr&gt;          &lt;chr&gt;                 
+##  1 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  2 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  3 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  4 2156-02-18 13:02:00 URGENT         TRANSFER FROM HOSPITAL
+##  5 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  6 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  7 NA                  URGENT         TRANSFER FROM HOSPITAL
+##  8 2176-12-17 00:00:00 URGENT         TRANSFER FROM HOSPITAL
+##  9 2187-05-12 00:00:00 URGENT         TRANSFER FROM HOSPITAL
+## 10 NA                  URGENT         TRANSFER FROM HOSPITAL
+##    discharge_location           insurance language marital_status
+##    &lt;chr&gt;                        &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;         
+##  1 HOME HEALTH CARE             Other     ENGLISH  &lt;NA&gt;          
+##  2 HOME                         Other     ENGLISH  &lt;NA&gt;          
+##  3 CHRONIC/LONG TERM ACUTE CARE Medicare  ENGLISH  &lt;NA&gt;          
+##  4 DIED                         Medicaid  ?        &lt;NA&gt;          
+##  5 HOME HEALTH CARE             Medicare  ?        &lt;NA&gt;          
+##  6 HOME HEALTH CARE             Medicare  ?        &lt;NA&gt;          
+##  7 AGAINST ADVICE               Other     ENGLISH  &lt;NA&gt;          
+##  8 DIED                         Medicare  ENGLISH  &lt;NA&gt;          
+##  9 DIED                         Other     ENGLISH  &lt;NA&gt;          
+## 10 HOME HEALTH CARE             Medicare  ENGLISH  &lt;NA&gt;          
+##    ethnicity              edregtime           edouttime          
+##    &lt;chr&gt;                  &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 WHITE                  NA                  NA                 
+##  2 UNKNOWN                2189-08-09 03:51:00 2189-08-09 06:38:00
+##  3 UNKNOWN                NA                  NA                 
+##  4 BLACK/AFRICAN AMERICAN NA                  NA                 
+##  5 UNABLE TO OBTAIN       NA                  NA                 
+##  6 UNKNOWN                NA                  NA                 
+##  7 UNKNOWN                NA                  NA                 
+##  8 BLACK/AFRICAN AMERICAN NA                  NA                 
+##  9 UNKNOWN                NA                  NA                 
+## 10 WHITE                  NA                  NA                 
+##    hospital_expire_flag
+##                   &lt;int&gt;
+##  1                    0
+##  2                    0
+##  3                    0
+##  4                    1
+##  5                    0
+##  6                    0
+##  7                    0
+##  8                    1
+##  9                    1
+## 10                    0
+## # … with more rows</code></pre>
 <ol start="5" style="list-style-type: decimal">
 <li>Connect to the <code>patients</code> table and only keep the patients who have a match in <code>icustays_tble</code> (according to <code>subject_id</code>).</li>
 </ol>
