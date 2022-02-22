@@ -466,8 +466,47 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 <ol start="5" style="list-style-type: decimal">
 <li>Connect to the <code>patients</code> table and only keep the patients who have a match in <code>icustays_tble</code> (according to <code>subject_id</code>).</li>
 </ol>
-<pre class="r"><code># # TODO
-# patients_tble &lt;-</code></pre>
+<pre class="r"><code>patients_tble &lt;-
+  tbl(con, &quot;patients&quot;) %&gt;%
+  show_query() %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM `patients`
+## # Source:   table&lt;patients&gt; [?? x 6]
+## # Database: BigQueryConnection
+##    subject_id gender anchor_age anchor_year anchor_year_group dod   
+##         &lt;int&gt; &lt;chr&gt;       &lt;int&gt;       &lt;int&gt; &lt;chr&gt;             &lt;date&gt;
+##  1   10137012 F               0        2110 2008 - 2010       NA    
+##  2   10156260 M               0        2110 2014 - 2016       NA    
+##  3   10158897 M               0        2110 2008 - 2010       NA    
+##  4   10413283 M               0        2110 2014 - 2016       NA    
+##  5   10660064 M               0        2110 2017 - 2019       NA    
+##  6   10736768 F               0        2110 2017 - 2019       NA    
+##  7   10782862 F               0        2110 2008 - 2010       NA    
+##  8   10942655 M               0        2110 2008 - 2010       NA    
+##  9   10999598 M               0        2110 2008 - 2010       NA    
+## 10   11024137 F               0        2110 2008 - 2010       NA    
+## # … with more rows</code></pre>
+<pre class="r"><code>patients_tble &lt;- patients_tble %&gt;%
+  semi_join(icustays_tble,
+            by = c(&quot;subject_id&quot;)) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # Source:   lazy query [?? x 6]
+## # Database: BigQueryConnection
+##    subject_id gender anchor_age anchor_year anchor_year_group dod   
+##         &lt;int&gt; &lt;chr&gt;       &lt;int&gt;       &lt;int&gt; &lt;chr&gt;             &lt;date&gt;
+##  1   19137716 F              18        2111 2008 - 2010       NA    
+##  2   19077387 F              18        2112 2017 - 2019       NA    
+##  3   11155072 M              18        2113 2011 - 2013       NA    
+##  4   17945455 F              18        2113 2014 - 2016       NA    
+##  5   17689255 F              18        2113 2017 - 2019       NA    
+##  6   10894885 F              18        2114 2008 - 2010       NA    
+##  7   15175657 M              18        2114 2014 - 2016       NA    
+##  8   17600374 F              18        2118 2014 - 2016       NA    
+##  9   16501289 M              18        2118 2017 - 2019       NA    
+## 10   10141487 F              18        2119 2017 - 2019       NA    
+## # … with more rows</code></pre>
 <ol start="6" style="list-style-type: decimal">
 <li>Connect to the <code>labevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the lab items listed in HW2.</li>
 </ol>
