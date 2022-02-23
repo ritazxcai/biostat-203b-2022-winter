@@ -564,14 +564,29 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 ##  9   10005464  51491 2165-06-28 07:05:00      6.5
 ## 10   10006029  50954 2169-01-22 12:00:00    226  
 ## # … with more rows</code></pre>
-<pre class="r"><code>labevents_tble &lt;- labevents_tble %&gt;%
-  semi_join(icustays_tble,
-            by = c(&quot;subject_id&quot;)) %&gt;%
+<pre class="r"><code>labevents_tble &lt;- labevents_tble %&gt;% 
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
   filter(itemid %in% dlabitems_tble$itemid) %&gt;%
   print(width = Inf)</code></pre>
 <p>Only keep the first lab measurements during ICU stay and pivot lab items to become variables/columns.</p>
-<pre class="r"><code># # TODO
-# labevents_tble &lt;- labevents_tble %&gt;% ...</code></pre>
+<pre class="r"><code>labevents_tble &lt;-
+  labevents_tble %&gt;%
+  left_join(select(icustays_tble, subject_id, intime),
+            by = c(&quot;subject_id&quot;)) %&gt;%
+  filter (charttime &gt;= intime) %&gt;%
+    group_by(subject_id, itemid) %&gt;%
+    arrange(charttime, .by_group = TRUE) %&gt;%
+    slice_head(n = 1) %&gt;%
+    select(-charttime, -intime) %&gt;%
+    ungroup %&gt;%
+    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
+    rename_at(
+        vars(as.character(dlabitems_tble$itemid)),
+        ~str_to_lower(dlabitems_tble$label)
+        ) %&gt;%
+    rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
+    print(width = Inf) %&gt;%
+  write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
 <ol start="7" style="list-style-type: decimal">
 <li>Connect to <code>chartevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the chart events listed in HW2.</li>
 </ol>
