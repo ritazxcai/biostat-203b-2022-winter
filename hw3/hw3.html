@@ -510,37 +510,21 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 <ol start="6" style="list-style-type: decimal">
 <li>Connect to the <code>labevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the lab items listed in HW2.</li>
 </ol>
-<pre class="r"><code>dlabitems_tble &lt;- tbl(con, &quot;d_labitems&quot;) %&gt;%
+<pre class="r"><code>dlabitem_tble &lt;- 
+  tbl(con, &quot;d_labitems&quot;) %&gt;%
+  filter(itemid %in% c(
+    50912,
+    50971,
+    50983,
+    50902,
+    50882,
+    51221,
+    51301,
+    50931,
+    50960,
+    50893)) %&gt;%
   show_query() %&gt;%
-    filter(itemid %in% c(
-        50912,
-        50971,
-        50983,
-        50902,
-        50882,
-        51221,
-        51301,
-        50931,
-        50960,
-        50893)) %&gt;%
-    print(width = Inf)</code></pre>
-<pre><code>## &lt;SQL&gt;
-## SELECT *
-## FROM `d_labitems`
-## # Source:   lazy query [?? x 5]
-## # Database: BigQueryConnection
-##    itemid label             fluid category   loinc_code
-##     &lt;int&gt; &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;     
-##  1  50882 Bicarbonate       Blood Chemistry  1963-8    
-##  2  50893 Calcium, Total    Blood Chemistry  2000-8    
-##  3  50902 Chloride          Blood Chemistry  2075-0    
-##  4  50912 Creatinine        Blood Chemistry  2160-0    
-##  5  50931 Glucose           Blood Chemistry  6777-7    
-##  6  50960 Magnesium         Blood Chemistry  2601-3    
-##  7  50971 Potassium         Blood Chemistry  2823-3    
-##  8  50983 Sodium            Blood Chemistry  2951-2    
-##  9  51221 Hematocrit        Blood Hematology 4544-3    
-## 10  51301 White Blood Cells Blood Hematology 804-5</code></pre>
+  print(width = Inf)</code></pre>
 <pre class="r"><code>labevents_tble &lt;-
   tbl(con, &quot;labevents&quot;) %&gt;%
   select(subject_id, itemid, charttime, valuenum) %&gt;%
@@ -565,26 +549,49 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 ## 10   10006029  50954 2169-01-22 12:00:00    226  
 ## # … with more rows</code></pre>
 <pre class="r"><code>labevents_tble &lt;- labevents_tble %&gt;% 
-  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
-  filter(itemid %in% dlabitems_tble$itemid) %&gt;%
+  semi_join(icustays_tble,
+            by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% c(
+    50912,
+    50971,
+    50983,
+    50902,
+    50882,
+    51221,
+    51301,
+    50931,
+    50960,
+    50893)) %&gt;%
+  show_query() %&gt;%
   print(width = Inf)</code></pre>
 <p>Only keep the first lab measurements during ICU stay and pivot lab items to become variables/columns.</p>
 <pre class="r"><code>labevents_tble &lt;-
   labevents_tble %&gt;%
   left_join(select(icustays_tble, subject_id, intime),
             by = c(&quot;subject_id&quot;)) %&gt;%
-  filter (charttime &gt;= intime) %&gt;%
-    group_by(subject_id, itemid) %&gt;%
-    arrange(charttime, .by_group = TRUE) %&gt;%
-    slice_head(n = 1) %&gt;%
-    select(-charttime, -intime) %&gt;%
+  group_by(subject_id, itemid) %&gt;%
+    slice_min(intime) %&gt;%
     ungroup %&gt;%
     pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
     rename_at(
         vars(as.character(dlabitems_tble$itemid)),
         ~str_to_lower(dlabitems_tble$label)
         ) %&gt;%
-    rename(wbc = `white blood cells`, calcium = `calcium, total`) %&gt;%
+  show_query() %&gt;%
+  print(wdith = Inf)</code></pre>
+<pre class="r"><code>labevents_tble &lt;-
+  labevents_tble %&gt;%
+  left_join(select(icustays_tble, subject_id, intime),
+            by = c(&quot;subject_id&quot;)) %&gt;%
+    group_by(subject_id, itemid) %&gt;%
+    slice_min(intime) %&gt;%
+    ungroup %&gt;%
+    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
+    rename_at(
+        vars(as.character(dlabitems_tble$itemid)),
+        ~str_to_lower(dlabitems_tble$label)
+        ) %&gt;%
+  show_query() %&gt;%
     print(width = Inf) %&gt;%
   write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
 <ol start="7" style="list-style-type: decimal">

@@ -109,21 +109,22 @@ patients_tble <- patients_tble %>%
 ```
 
 6. Connect to the `labevents` table and retrieve a subset that only contain subjects who appear in `icustays_tble` and the lab items listed in HW2.
-```{r}
-dlabitems_tble <- tbl(con, "d_labitems") %>%
+```{r, eval=F}
+dlabitem_tble <- 
+  tbl(con, "d_labitems") %>%
+  filter(itemid %in% c(
+    50912,
+    50971,
+    50983,
+    50902,
+    50882,
+    51221,
+    51301,
+    50931,
+    50960,
+    50893)) %>%
   show_query() %>%
-	filter(itemid %in% c(
-		50912,
-		50971,
-		50983,
-		50902,
-		50882,
-		51221,
-		51301,
-		50931,
-		50960,
-		50893)) %>%
-	print(width = Inf)
+  print(width = Inf)
 ```
 
 
@@ -137,28 +138,58 @@ labevents_tble <-
 
 ```{r, eval=F}
 labevents_tble <- labevents_tble %>% 
-  semi_join(icustays_tble, by = c("subject_id")) %>%
-  filter(itemid %in% dlabitems_tble$itemid) %>%
+  semi_join(icustays_tble,
+            by = c("subject_id")) %>%
+  filter(itemid %in% c(
+    50912,
+    50971,
+    50983,
+    50902,
+    50882,
+    51221,
+    51301,
+    50931,
+    50960,
+    50893)) %>%
+  show_query() %>%
   print(width = Inf)
 ```
+
 Only keep the first lab measurements during ICU stay and pivot lab items to become variables/columns.
-```{r, eval=F}
+```{r,eval=F}
 labevents_tble <-
   labevents_tble %>%
   left_join(select(icustays_tble, subject_id, intime),
             by = c("subject_id")) %>%
-  filter (charttime >= intime) %>%
-	group_by(subject_id, itemid) %>%
-	arrange(charttime, .by_group = TRUE) %>%
-	slice_head(n = 1) %>%
-	select(-charttime, -intime) %>%
+  group_by(subject_id, itemid) %>%
+	slice_min(intime) %>%
 	ungroup %>%
 	pivot_wider(names_from = itemid, values_from = valuenum) %>%
 	rename_at(
 		vars(as.character(dlabitems_tble$itemid)),
 		~str_to_lower(dlabitems_tble$label)
 		) %>%
-	rename(wbc = `white blood cells`, calcium = `calcium, total`) %>%
+  show_query() %>%
+  print(wdith = Inf)
+```
+
+
+
+
+```{r, eval=F}
+labevents_tble <-
+  labevents_tble %>%
+  left_join(select(icustays_tble, subject_id, intime),
+            by = c("subject_id")) %>%
+	group_by(subject_id, itemid) %>%
+	slice_min(intime) %>%
+	ungroup %>%
+	pivot_wider(names_from = itemid, values_from = valuenum) %>%
+	rename_at(
+		vars(as.character(dlabitems_tble$itemid)),
+		~str_to_lower(dlabitems_tble$label)
+		) %>%
+  show_query() %>%
 	print(width = Inf) %>%
   write_rds("labevents.tble.rds")
 ```
