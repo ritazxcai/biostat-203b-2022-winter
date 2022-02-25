@@ -510,7 +510,7 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 <ol start="6" style="list-style-type: decimal">
 <li>Connect to the <code>labevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the lab items listed in HW2.</li>
 </ol>
-<pre class="r"><code>dlabitem_tble &lt;- 
+<pre class="r"><code>dlabitems_tble &lt;- 
   tbl(con, &quot;d_labitems&quot;) %&gt;%
   filter(itemid %in% c(
     50912,
@@ -569,31 +569,24 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
   labevents_tble %&gt;%
   left_join(select(icustays_tble, subject_id, intime),
             by = c(&quot;subject_id&quot;)) %&gt;%
+  filter (charttime &gt;= intime) %&gt;%
   group_by(subject_id, itemid) %&gt;%
-    slice_min(intime) %&gt;%
+    summarise_all(min) %&gt;%
     ungroup %&gt;%
-    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
-    rename_at(
-        vars(as.character(dlabitems_tble$itemid)),
-        ~str_to_lower(dlabitems_tble$label)
-        ) %&gt;%
+    pivot_wider(names_prefix = &quot;char_&quot;, names_from = itemid, values_from = valuenum) %&gt;%
+  rename(wbc = `char_51301`,
+         calcium = `char_50893`,
+         bicarbonate = `char_50882`,
+         chloride = `char_50902`,
+         creatinine = `char_50912`,
+         glucose = `char_50931`,
+         magnesium = `char_50960`,
+         potassium = `char_50971`,
+         sodium = `char_50983`,
+         hematocrit = `char_51221`
+         ) %&gt;%
   show_query() %&gt;%
-  print(wdith = Inf)</code></pre>
-<pre class="r"><code>labevents_tble &lt;-
-  labevents_tble %&gt;%
-  left_join(select(icustays_tble, subject_id, intime),
-            by = c(&quot;subject_id&quot;)) %&gt;%
-    group_by(subject_id, itemid) %&gt;%
-    slice_min(intime) %&gt;%
-    ungroup %&gt;%
-    pivot_wider(names_from = itemid, values_from = valuenum) %&gt;%
-    rename_at(
-        vars(as.character(dlabitems_tble$itemid)),
-        ~str_to_lower(dlabitems_tble$label)
-        ) %&gt;%
-  show_query() %&gt;%
-    print(width = Inf) %&gt;%
-  write_rds(&quot;labevents.tble.rds&quot;)</code></pre>
+  print(width = Inf)</code></pre>
 <ol start="7" style="list-style-type: decimal">
 <li>Connect to <code>chartevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the chart events listed in HW2.</li>
 </ol>

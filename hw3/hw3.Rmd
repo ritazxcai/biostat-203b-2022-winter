@@ -110,7 +110,7 @@ patients_tble <- patients_tble %>%
 
 6. Connect to the `labevents` table and retrieve a subset that only contain subjects who appear in `icustays_tble` and the lab items listed in HW2.
 ```{r, eval=F}
-dlabitem_tble <- 
+dlabitems_tble <- 
   tbl(con, "d_labitems") %>%
   filter(itemid %in% c(
     50912,
@@ -161,38 +161,27 @@ labevents_tble <-
   labevents_tble %>%
   left_join(select(icustays_tble, subject_id, intime),
             by = c("subject_id")) %>%
+  filter (charttime >= intime) %>%
   group_by(subject_id, itemid) %>%
-	slice_min(intime) %>%
+	summarise_all(min) %>%
 	ungroup %>%
-	pivot_wider(names_from = itemid, values_from = valuenum) %>%
-	rename_at(
-		vars(as.character(dlabitems_tble$itemid)),
-		~str_to_lower(dlabitems_tble$label)
-		) %>%
+	pivot_wider(names_prefix = "char_", names_from = itemid, values_from = valuenum) %>%
+  rename(wbc = `char_51301`,
+         calcium = `char_50893`,
+         bicarbonate = `char_50882`,
+         chloride = `char_50902`,
+         creatinine = `char_50912`,
+         glucose = `char_50931`,
+         magnesium = `char_50960`,
+         potassium = `char_50971`,
+         sodium = `char_50983`,
+         hematocrit = `char_51221`
+         ) %>%
   show_query() %>%
-  print(wdith = Inf)
+  print(width = Inf)
 ```
 
 
-
-
-```{r, eval=F}
-labevents_tble <-
-  labevents_tble %>%
-  left_join(select(icustays_tble, subject_id, intime),
-            by = c("subject_id")) %>%
-	group_by(subject_id, itemid) %>%
-	slice_min(intime) %>%
-	ungroup %>%
-	pivot_wider(names_from = itemid, values_from = valuenum) %>%
-	rename_at(
-		vars(as.character(dlabitems_tble$itemid)),
-		~str_to_lower(dlabitems_tble$label)
-		) %>%
-  show_query() %>%
-	print(width = Inf) %>%
-  write_rds("labevents.tble.rds")
-```
 
 7. Connect to `chartevents` table and retrieve a subset that only contain subjects who appear in `icustays_tble` and the chart events listed in HW2.
 ```{r}
