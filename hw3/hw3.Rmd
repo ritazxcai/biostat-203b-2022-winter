@@ -169,8 +169,9 @@ labevents_tble <-
   labevents_tble %>%
   left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c("subject_id")) %>%
-  filter (charttime >= intime & charttime <= outtime) %>%
+  filter(charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
+  arrange(charttime, .by_group = TRUE) %>%
   slice_min(charttime, n=1) %>%
 	ungroup %>%
 	pivot_wider(names_prefix = "char_",
@@ -238,8 +239,9 @@ chartevents_tble <-
   chartevents_tble %>%
   left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c("subject_id")) %>%
-  filter (charttime >= intime & charttime <= outtime) %>%
+  filter(charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
+  arrange(charttime, .by_group = TRUE) %>%
   slice_min(charttime, n=1) %>%
 	ungroup %>%
 	pivot_wider(names_prefix = "char_",

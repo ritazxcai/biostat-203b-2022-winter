@@ -554,8 +554,9 @@ dlabitems_tble &lt;-
   labevents_tble %&gt;%
   left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c(&quot;subject_id&quot;)) %&gt;%
-  filter (charttime &gt;= intime &amp; charttime &lt;= outtime) %&gt;%
+  filter(charttime &gt;= intime &amp; charttime &lt;= outtime) %&gt;%
   group_by(subject_id, itemid) %&gt;%
+  arrange(charttime, .by_group = TRUE) %&gt;%
   slice_min(charttime, n=1) %&gt;%
     ungroup %&gt;%
     pivot_wider(names_prefix = &quot;char_&quot;,
@@ -575,6 +576,10 @@ dlabitems_tble &lt;-
   select(-charttime, -intime, -outtime) %&gt;%
   show_query() %&gt;%
   print(width = Inf)</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?
+## ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
 <pre><code>## &lt;SQL&gt;
 ## SELECT `subject_id`, `char_50912` AS `creatinine`, `char_50902` AS `chloride`, `char_50983` AS `sodium`, `char_51301` AS `wbc`, `char_50882` AS `bicarbonate`, `char_51221` AS `hematocrit`, `char_50971` AS `potassium`, `char_50893` AS `calcium`, `char_50960` AS `magnesium`, `char_50931` AS `glucose`
 ## FROM (SELECT `subject_id`, `charttime`, `intime`, `outtime`, MAX(IF(`itemid` = 50912, `valuenum`, NULL)) AS `char_50912`, MAX(IF(`itemid` = 50902, `valuenum`, NULL)) AS `char_50902`, MAX(IF(`itemid` = 50983, `valuenum`, NULL)) AS `char_50983`, MAX(IF(`itemid` = 51301, `valuenum`, NULL)) AS `char_51301`, MAX(IF(`itemid` = 50882, `valuenum`, NULL)) AS `char_50882`, MAX(IF(`itemid` = 51221, `valuenum`, NULL)) AS `char_51221`, MAX(IF(`itemid` = 50971, `valuenum`, NULL)) AS `char_50971`, MAX(IF(`itemid` = 50893, `valuenum`, NULL)) AS `char_50893`, MAX(IF(`itemid` = 50960, `valuenum`, NULL)) AS `char_50960`, MAX(IF(`itemid` = 50931, `valuenum`, NULL)) AS `char_50931`
@@ -609,8 +614,10 @@ dlabitems_tble &lt;-
 ## ) `q02`
 ## WHERE (`charttime` &gt;= `intime` AND `charttime` &lt;= `outtime`)) `q03`
 ## WHERE (`q01` &lt;= 1)) `q04`
-## GROUP BY `subject_id`, `charttime`, `intime`, `outtime`) `q05`
-## # Source:   lazy query [?? x 11]
+## GROUP BY `subject_id`, `charttime`, `intime`, `outtime`) `q05`</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
+<pre><code>## # Source:   lazy query [?? x 11]
 ## # Database: BigQueryConnection
 ##    subject_id creatinine chloride sodium   wbc bicarbonate hematocrit potassium
 ##         &lt;int&gt;      &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
@@ -641,6 +648,8 @@ dlabitems_tble &lt;-
 labevents_tble %&gt;%
   summarise(n=n()) %&gt;%
   print(width = Inf)</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
 <pre><code>## # Source:   lazy query [?? x 1]
 ## # Database: BigQueryConnection
 ##       n
@@ -709,8 +718,9 @@ chartevents_tble &lt;-
   chartevents_tble %&gt;%
   left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c(&quot;subject_id&quot;)) %&gt;%
-  filter (charttime &gt;= intime &amp; charttime &lt;= outtime) %&gt;%
+  filter(charttime &gt;= intime &amp; charttime &lt;= outtime) %&gt;%
   group_by(subject_id, itemid) %&gt;%
+  arrange(charttime, .by_group = TRUE) %&gt;%
   slice_min(charttime, n=1) %&gt;%
     ungroup %&gt;%
     pivot_wider(names_prefix = &quot;char_&quot;,
@@ -725,6 +735,10 @@ chartevents_tble &lt;-
   select(-charttime, -intime, -outtime) %&gt;%
   show_query() %&gt;%
   print(width = Inf)</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?
+## ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
 <pre><code>## &lt;SQL&gt;
 ## SELECT `subject_id`, `char_220210` AS `RR`, `char_223761` AS `Temp_F`, `char_220181` AS `NBPm`, `char_220179` AS `NBPs`, `char_220045` AS `HR`
 ## FROM (SELECT `subject_id`, `charttime`, `intime`, `outtime`, MAX(IF(`itemid` = 220210, `valuenum`, NULL)) AS `char_220210`, MAX(IF(`itemid` = 223761, `valuenum`, NULL)) AS `char_223761`, MAX(IF(`itemid` = 220181, `valuenum`, NULL)) AS `char_220181`, MAX(IF(`itemid` = 220179, `valuenum`, NULL)) AS `char_220179`, MAX(IF(`itemid` = 220045, `valuenum`, NULL)) AS `char_220045`
@@ -759,8 +773,10 @@ chartevents_tble &lt;-
 ## ) `q02`
 ## WHERE (`charttime` &gt;= `intime` AND `charttime` &lt;= `outtime`)) `q03`
 ## WHERE (`q01` &lt;= 1)) `q04`
-## GROUP BY `subject_id`, `charttime`, `intime`, `outtime`) `q05`
-## # Source:   lazy query [?? x 6]
+## GROUP BY `subject_id`, `charttime`, `intime`, `outtime`) `q05`</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
+<pre><code>## # Source:   lazy query [?? x 6]
 ## # Database: BigQueryConnection
 ##    subject_id    RR Temp_F  NBPm  NBPs    HR
 ##         &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -779,6 +795,8 @@ chartevents_tble &lt;-
 chartevents_tble %&gt;%
   summarise(n=n()) %&gt;%
   print(width = Inf)</code></pre>
+<pre><code>## Warning: ORDER BY is ignored in subqueries without LIMIT
+## ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
 <pre><code>## # Source:   lazy query [?? x 1]
 ## # Database: BigQueryConnection
 ##        n
