@@ -80,33 +80,46 @@ icustays_tble <- icustays_tble %>%
   show_query() %>%
   print(width = Inf)
 ```
+```{r}
+# Checking the number of observations in `icustays_tble`
+icustays_tble %>%
+  summarise(n=n()) %>%
+  print(width = Inf)
+```
 
 
 4. Connect to the `admissions` table and only keep the patients who have a match in `icustays_tble` (according to `subject_id` and `hadm_id`).
 ```{r}
 admissions_tble <-
   tbl(con, "admissions") %>%
+  semi_join(icustays_tble, by = c("subject_id", "hadm_id")) %>%
   show_query() %>%
   print(width = Inf)
+```
 
-admissions_tble <- admissions_tble %>%
-  semi_join(icustays_tble,
-            by = c("subject_id", "hadm_id")) %>%
+```{r}
+# Checking the number of observations in `admissions_tble`
+admissions_tble %>%
+  summarise(n=n()) %>%
   print(width = Inf)
 ```
+
 
 5. Connect to the `patients` table and only keep the patients who have a match in `icustays_tble` (according to `subject_id`).
 ```{r}
 patients_tble <-
   tbl(con, "patients") %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
   show_query() %>%
   print(width = Inf)
-
-patients_tble <- patients_tble %>%
-  semi_join(icustays_tble,
-            by = c("subject_id")) %>%
+```
+```{r}
+# Checking the number of observations in `patients_tble`
+patients_tble %>%
+  summarise(n=n()) %>%
   print(width = Inf)
 ```
+
 
 6. Connect to the `labevents` table and retrieve a subset that only contain subjects who appear in `icustays_tble` and the lab items listed in HW2.
 ```{r, eval=F}
@@ -179,7 +192,10 @@ labevents_tble <-
          potassium = `char_50971`,
          sodium = `char_50983`,
          hematocrit = `char_51221`
-         )
+         ) %>%
+  select(-charttime, -intime) %>%
+  show_query() %>%
+  print(width = Inf)
 ```
 
 
@@ -233,7 +249,10 @@ chartevents_tble <-
          NBPs = `char_220179`,
          NBPm = `char_220181`,
          Temp_F = `char_223761`
-  )
+  ) %>%
+  select(-charttime, -intime) %>%
+  show_query() %>%
+  print(width = Inf)
 ```
 
 8. Put things together. This step is similar to Q7 of HW2. Using one chain of pipes `%>%` to perform following data wrangling steps: (i) start with the `icustays_tble` for the first ICU stay of each unique patient, (ii) merge in admissions and patients tables, (iii) keep adults only (age at admission >= 18), (iv) merge in the labevents and chartevents tables, (v) create an indicator for 30-day mortality, (vi) save the final tibble to an `icu_cohort.rds` R data file in the `mimiciv_shiny` folder.
@@ -245,10 +264,25 @@ if (!dir.exists("mimiciv_shiny")) {
 }
 ```
 
-```{r}
+```{r, eval=F}
 # # TODO
-# icu_cohort <- icustays_tble %>% ...
+icu_cohort <- icustays_tble %>%
+  left_join(admissions_tble, by = c("subject_id", "hadm_id")) %>%
+	left_join(patients_tble, by = "subject_id") %>%
+	mutate(age_adm = anchor_age + year(admittime) - anchor_year) %>%
+  filter(age_adm >= 18) %>%
+	left_join(labevents_tble, by = "subject_id") %>%
+	left_join(chartevents_tble, by = "subject_id") %>%
+  collect() %>%
+  mutate(thirty_day_mort = ifelse
+         (date_diff(DATE(dod), date(admittime), day) <= 30, 1,0)) %>%
+  write_rds("mimiciv_shiny/icu_cohort.rds")
+
+
 ```
+
+
+
 
 Close database connection and clear workspace.
 ```{r, eval=F}
