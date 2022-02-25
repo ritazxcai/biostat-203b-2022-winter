@@ -146,14 +146,7 @@ dlabitems_tble <-
 labevents_tble <-
   tbl(con, "labevents") %>%
   select(subject_id, itemid, charttime, valuenum) %>%
-  show_query() %>%
-  print(width = Inf)
-```
-
-```{r, eval=F}
-labevents_tble <- labevents_tble %>% 
-  semi_join(icustays_tble,
-            by = c("subject_id")) %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
   filter(itemid %in% c(
     50912,
     50971,
@@ -167,6 +160,7 @@ labevents_tble <- labevents_tble %>%
     50893)) %>%
   show_query() %>%
   print(width = Inf)
+
 ```
 
 Only keep the first lab measurements during ICU stay and pivot lab items to become variables/columns.
@@ -177,7 +171,7 @@ labevents_tble <-
             by = c("subject_id")) %>%
   filter (charttime >= intime) %>%
   group_by(subject_id, itemid) %>%
-	summarise_all(min) %>%
+  slice_min(charttime, n=1) %>%
 	ungroup %>%
 	pivot_wider(names_prefix = "char_",
 	            names_from = itemid,
@@ -195,6 +189,13 @@ labevents_tble <-
          ) %>%
   select(-charttime, -intime) %>%
   show_query() %>%
+  print(width = Inf)
+```
+
+```{r}
+# Checking the number of observations in `labevents_tble`
+labevents_tble %>%
+  summarise(n=n()) %>%
   print(width = Inf)
 ```
 
@@ -235,11 +236,11 @@ Only keep the first chart events during ICU stay and pivot chart events to becom
 ```{r}
 chartevents_tble <-
   chartevents_tble %>%
-  left_join(select(icustays_tble, subject_id, intime),
+  left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c("subject_id")) %>%
-  filter (charttime >= intime) %>%
+  filter (charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
-	summarise_all(min) %>%
+  slice_min(charttime, n=1) %>%
 	ungroup %>%
 	pivot_wider(names_prefix = "char_",
 	            names_from = itemid,
@@ -250,10 +251,20 @@ chartevents_tble <-
          NBPm = `char_220181`,
          Temp_F = `char_223761`
   ) %>%
-  select(-charttime, -intime) %>%
+  select(-charttime, -intime, -outtime) %>%
   show_query() %>%
   print(width = Inf)
 ```
+
+
+```{r}
+# Checking the number of observations in `chartevents_tble`
+chartevents_tble %>%
+  summarise(n=n()) %>%
+  print(width = Inf)
+```
+
+
 
 8. Put things together. This step is similar to Q7 of HW2. Using one chain of pipes `%>%` to perform following data wrangling steps: (i) start with the `icustays_tble` for the first ICU stay of each unique patient, (ii) merge in admissions and patients tables, (iii) keep adults only (age at admission >= 18), (iv) merge in the labevents and chartevents tables, (v) create an indicator for 30-day mortality, (vi) save the final tibble to an `icu_cohort.rds` R data file in the `mimiciv_shiny` folder.
 
@@ -274,15 +285,22 @@ icu_cohort <- icustays_tble %>%
 	left_join(labevents_tble, by = "subject_id") %>%
 	left_join(chartevents_tble, by = "subject_id") %>%
   collect() %>%
-  mutate(thirty_day_mort = ifelse
-         (date_diff(DATE(dod), date(admittime), day) <= 30, 1,0)) %>%
+  mutate(alive_days_before_death = ifelse(is.na(dod), FALSE,
+                day(dod) - day(admittime))) %>%
+  mutate(thirty_day_mort = alive_days_before_death < 30) %>%
+  select(-alive_days_before_death) %>%
   write_rds("mimiciv_shiny/icu_cohort.rds")
 
-
 ```
-
-
-
+```{r, eval=F}
+# Checking the number of individuals with <30 `thirty_day_mort`
+icu_cohort %>%
+  select(admittime, dod, thirty_day_mort) %>%
+  na.exclude %>%
+  filter(thirty_day_mort == TRUE) %>%
+  summarise(n=n()) %>%
+  print(width = Inf)
+```
 
 Close database connection and clear workspace.
 ```{r, eval=F}
