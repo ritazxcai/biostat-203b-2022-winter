@@ -164,7 +164,7 @@ labevents_tble <-
 ```
 
 Only keep the first lab measurements during ICU stay and pivot lab items to become variables/columns.
-```{r,eval=F}
+```{r}
 labevents_tble <-
   labevents_tble %>%
   left_join(select(icustays_tble, subject_id, intime, outtime),
@@ -289,7 +289,7 @@ icu_cohort <- icustays_tble %>%
                 day(dod) - day(admittime))) %>%
   mutate(thirty_day_mort = alive_days_before_death < 30) %>%
   select(-alive_days_before_death) %>%
-  write_rds("mimiciv_shiny/icu_cohort.rds")
+  write_rds("mimiciv_shiny/app/icu_cohort.rds")
 
 ```
 ```{r, eval=F}
@@ -311,4 +311,5 @@ rm(list = ls())
 ## Q2. Shiny app
 
 Develop a Shiny app for exploring the ICU cohort data created in Q1. The app should reside in the `mimiciv_shiny` folder. The app should provide easy access to the graphical and numerical summaries of variables (demographics, lab measurements, vitals) in the ICU cohort.
+
 
