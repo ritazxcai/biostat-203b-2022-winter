@@ -167,9 +167,9 @@ Only keep the first lab measurements during ICU stay and pivot lab items to beco
 ```{r,eval=F}
 labevents_tble <-
   labevents_tble %>%
-  left_join(select(icustays_tble, subject_id, intime),
+  left_join(select(icustays_tble, subject_id, intime, outtime),
             by = c("subject_id")) %>%
-  filter (charttime >= intime) %>%
+  filter (charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
   slice_min(charttime, n=1) %>%
 	ungroup %>%
@@ -187,7 +187,7 @@ labevents_tble <-
          sodium = `char_50983`,
          hematocrit = `char_51221`
          ) %>%
-  select(-charttime, -intime) %>%
+  select(-charttime, -intime, -outtime) %>%
   show_query() %>%
   print(width = Inf)
 ```
