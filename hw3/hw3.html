@@ -510,7 +510,8 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
 <ol start="6" style="list-style-type: decimal">
 <li>Connect to the <code>labevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the lab items listed in HW2.</li>
 </ol>
-<pre class="r"><code>dlabitems_tble &lt;- 
+<pre class="r"><code># checking the list of lab items
+dlabitems_tble &lt;- 
   tbl(con, &quot;d_labitems&quot;) %&gt;%
   filter(itemid %in% c(
     50912,
@@ -584,17 +585,81 @@ icustays_tble &lt;- tbl(con, &quot;icustays&quot;) %&gt;%
          potassium = `char_50971`,
          sodium = `char_50983`,
          hematocrit = `char_51221`
-         ) %&gt;%
-  show_query() %&gt;%
-  print(width = Inf)</code></pre>
+         )</code></pre>
 <ol start="7" style="list-style-type: decimal">
 <li>Connect to <code>chartevents</code> table and retrieve a subset that only contain subjects who appear in <code>icustays_tble</code> and the chart events listed in HW2.</li>
 </ol>
+<pre class="r"><code># Checking the list of items
+ditems_tble &lt;- 
+  tbl(con, &quot;d_items&quot;) %&gt;%
+  filter(itemid %in% c(
+        220045,
+        220181,
+        220179,
+        223761,
+        220210)) %&gt;%
+  show_query() %&gt;%
+  print(width = Inf)</code></pre>
 <pre class="r"><code># # TODO
-# chartevents_tble &lt;- </code></pre>
+chartevents_tble &lt;-
+  tbl(con, &quot;chartevents&quot;) %&gt;%
+  select(subject_id, itemid, charttime, valuenum) %&gt;%
+  semi_join(icustays_tble, by = c(&quot;subject_id&quot;)) %&gt;%
+  filter(itemid %in% c(
+        220045,
+        220181,
+        220179,
+        223761,
+        220210)) %&gt;%
+  show_query() %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM (SELECT * FROM (SELECT `subject_id`, `itemid`, `charttime`, `valuenum`
+## FROM `chartevents`) `LHS`
+## WHERE EXISTS (
+##   SELECT 1 FROM (SELECT `LHS`.`subject_id` AS `subject_id`, `LHS`.`intime` AS `intime`, `hadm_id`, `stay_id`, `first_careunit`, `last_careunit`, `outtime`, `los`
+## FROM (SELECT `subject_id`, MIN(`intime`) AS `intime`
+## FROM (SELECT `subject_id`, `intime`
+## FROM `icustays`) `q01`
+## GROUP BY `subject_id`) `LHS`
+## LEFT JOIN `icustays` AS `RHS`
+## ON (`LHS`.`subject_id` = `RHS`.`subject_id` AND `LHS`.`intime` = `RHS`.`intime`)
+## ) `RHS`
+##   WHERE (`LHS`.`subject_id` = `RHS`.`subject_id`)
+## )) `q01`
+## WHERE (`itemid` IN (220045.0, 220181.0, 220179.0, 223761.0, 220210.0))
+## # Source:   lazy query [?? x 4]
+## # Database: BigQueryConnection
+##    subject_id itemid charttime           valuenum
+##         &lt;int&gt;  &lt;int&gt; &lt;dttm&gt;                 &lt;dbl&gt;
+##  1   14354220 223761 2136-01-16 22:04:00     98.6
+##  2   16537763 223761 2142-06-20 12:00:00     98.9
+##  3   16554888 223761 2209-12-20 00:00:00     99  
+##  4   10229726 223761 2128-07-23 05:55:00     98.1
+##  5   13325192 223761 2187-04-28 08:00:00     98.6
+##  6   13679226 223761 2163-07-31 16:00:00     97.1
+##  7   13907173 223761 2127-06-17 04:00:00     97.4
+##  8   14025287 223761 2187-11-08 01:25:00     98.2
+##  9   14320833 223761 2115-12-18 16:00:00    100. 
+## 10   17777109 223761 2159-06-25 20:00:00     96.7
+## # … with more rows</code></pre>
 <p>Only keep the first chart events during ICU stay and pivot chart events to become variables/columns.</p>
-<pre class="r"><code># # TODO
-# chartevents_tble &lt;- chartevents_tble %&gt;% ...</code></pre>
+<pre class="r"><code>chartevents_tble &lt;-
+  chartevents_tble %&gt;%
+  left_join(select(icustays_tble, subject_id, intime),
+            by = c(&quot;subject_id&quot;)) %&gt;%
+  filter (charttime &gt;= intime) %&gt;%
+  group_by(subject_id, itemid) %&gt;%
+    summarise_all(min) %&gt;%
+    ungroup %&gt;%
+    pivot_wider(names_prefix = &quot;char_&quot;, names_from = itemid, values_from = valuenum) %&gt;%
+  rename(HR = `char_220045`,
+         RR = `char_220210`,
+         NBPs = `char_220179`,
+         NBPm = `char_220181`,
+         Temp_F = `char_223761`
+         )</code></pre>
 <ol start="8" style="list-style-type: decimal">
 <li>Put things together. This step is similar to Q7 of HW2. Using one chain of pipes <code>%&gt;%</code> to perform following data wrangling steps: (i) start with the <code>icustays_tble</code> for the first ICU stay of each unique patient, (ii) merge in admissions and patients tables, (iii) keep adults only (age at admission &gt;= 18), (iv) merge in the labevents and chartevents tables, (v) create an indicator for 30-day mortality, (vi) save the final tibble to an <code>icu_cohort.rds</code> R data file in the <code>mimiciv_shiny</code> folder.</li>
 </ol>
