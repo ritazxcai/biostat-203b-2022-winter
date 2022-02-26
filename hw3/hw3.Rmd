@@ -282,7 +282,7 @@ if (!dir.exists("mimiciv_shiny")) {
 }
 ```
 
-```{r, eval=F}
+```{r}
 # # TODO
 icu_cohort <- icustays_tble %>%
   left_join(admissions_tble, by = c("subject_id", "hadm_id")) %>%
@@ -291,26 +291,28 @@ icu_cohort <- icustays_tble %>%
   filter(age_adm >= 18) %>%
 	left_join(labevents_tble, by = "subject_id") %>%
 	left_join(chartevents_tble, by = "subject_id") %>%
-  collect() %>%
-  mutate(alive_days_before_death = ifelse(is.na(dod), FALSE,
-                day(dod) - day(admittime))) %>%
-  mutate(thirty_day_mort = alive_days_before_death < 30) %>%
-  select(-alive_days_before_death) %>%
-  write_rds("mimiciv_shiny/app/icu_cohort.rds")
+  collect()
+
+icu_cohort$thirty_day_mort <- ifelse(date(icu_cohort$dod) - 
+                                       date(icu_cohort$admittime) <= 30,
+                                     "yes", "no")
+
+saveRDS(as.data.frame(icu_cohort),
+        file = "mimiciv_shiny/app/icu_cohort.rds")
 
 ```
-```{r, eval=F}
+```{r}
 # Checking the number of individuals with <30 `thirty_day_mort`
 icu_cohort %>%
   select(admittime, dod, thirty_day_mort) %>%
   na.exclude %>%
-  filter(thirty_day_mort == TRUE) %>%
+  filter(thirty_day_mort == "yes") %>%
   summarise(n=n()) %>%
   print(width = Inf)
 ```
 
 Close database connection and clear workspace.
-```{r, eval=F}
+```{r}
 dbDisconnect(con)
 rm(list = ls())
 ```

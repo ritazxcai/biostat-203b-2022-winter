@@ -828,19 +828,25 @@ icu_cohort &lt;- icustays_tble %&gt;%
   filter(age_adm &gt;= 18) %&gt;%
     left_join(labevents_tble, by = &quot;subject_id&quot;) %&gt;%
     left_join(chartevents_tble, by = &quot;subject_id&quot;) %&gt;%
-  collect() %&gt;%
-  mutate(alive_days_before_death = ifelse(is.na(dod), FALSE,
-                day(dod) - day(admittime))) %&gt;%
-  mutate(thirty_day_mort = alive_days_before_death &lt; 30) %&gt;%
-  select(-alive_days_before_death) %&gt;%
-  write_rds(&quot;mimiciv_shiny/app/icu_cohort.rds&quot;)</code></pre>
+  collect()
+
+icu_cohort$thirty_day_mort &lt;- ifelse(date(icu_cohort$dod) - 
+                                       date(icu_cohort$admittime) &lt;= 30,
+                                     &quot;yes&quot;, &quot;no&quot;)
+
+saveRDS(as.data.frame(icu_cohort),
+        file = &quot;mimiciv_shiny/app/icu_cohort.rds&quot;)</code></pre>
 <pre class="r"><code># Checking the number of individuals with &lt;30 `thirty_day_mort`
 icu_cohort %&gt;%
   select(admittime, dod, thirty_day_mort) %&gt;%
   na.exclude %&gt;%
-  filter(thirty_day_mort == TRUE) %&gt;%
+  filter(thirty_day_mort == &quot;yes&quot;) %&gt;%
   summarise(n=n()) %&gt;%
   print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 1 × 1
+##       n
+##   &lt;int&gt;
+## 1  5436</code></pre>
 <p>Close database connection and clear workspace.</p>
 <pre class="r"><code>dbDisconnect(con)
 rm(list = ls())</code></pre>
