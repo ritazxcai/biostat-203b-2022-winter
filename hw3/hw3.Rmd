@@ -171,9 +171,10 @@ labevents_tble <-
             by = c("subject_id")) %>%
   filter(charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
-  arrange(charttime, .by_group = TRUE) %>%
-  slice_min(charttime, n=1) %>%
-	ungroup %>%
+  slice_min(intime, n=1, with.ties = TRUE) %>%
+  group_by(intime) %>%
+  slice_min(charttime, n=1, with.ties = FALSE) %>%
+  ungroup %>%
 	pivot_wider(names_prefix = "char_",
 	            names_from = itemid,
 	            values_from = valuenum) %>%
@@ -188,6 +189,7 @@ labevents_tble <-
          sodium = `char_50983`,
          hematocrit = `char_51221`
          ) %>%
+  arrange(subject_id) %>%
   select(-charttime, -intime, -outtime) %>%
   show_query() %>%
   print(width = Inf)
@@ -241,8 +243,9 @@ chartevents_tble <-
             by = c("subject_id")) %>%
   filter(charttime >= intime & charttime <= outtime) %>%
   group_by(subject_id, itemid) %>%
-  arrange(charttime, .by_group = TRUE) %>%
-  slice_min(charttime, n=1) %>%
+  slice_min(intime, n=1, with.ties = TRUE) %>%
+  group_by(intime) %>%
+  slice_min(charttime, n=1, with.ties = FALSE) %>%
 	ungroup %>%
 	pivot_wider(names_prefix = "char_",
 	            names_from = itemid,
@@ -253,6 +256,7 @@ chartevents_tble <-
          NBPm = `char_220181`,
          Temp_F = `char_223761`
   ) %>%
+  arrange(subject_id) %>%
   select(-charttime, -intime, -outtime) %>%
   show_query() %>%
   print(width = Inf)
@@ -262,6 +266,7 @@ chartevents_tble <-
 ```{r}
 # Checking the number of observations in `chartevents_tble`
 chartevents_tble %>%
+  select(subject_id) %>%
   summarise(n=n()) %>%
   print(width = Inf)
 ```
