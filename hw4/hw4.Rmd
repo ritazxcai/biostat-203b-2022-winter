@@ -60,7 +60,7 @@ icu_cohort <-
   icu_cohort %>%
   select(-deathtime, -dod, -glucose, -hematocrit, -wbc, -bicarbonate,
          -potassium, -magnesium, -calcium, -sodium, -creatinine, -chloride,
-         -NBPm, -NBPs, -HR, -RR, -Temp_F)
+         -NBPm, -NBPs, -HR, -RR, -Temp_F, -edregtime, -edouttime)
 ```
 
 Next, find the number of outliers in variable `los` and decide whether to discard it:
@@ -131,28 +131,39 @@ icu_cohort <-
   select(-is_outlier)
 ```
 
+```{r}
+head(icu_cohort)
+```
+
+```{r}
+icu_cohort1 <-
+  icu_cohort %>%
+  mutate(intime_n = as.numeric(intime),
+         outtime_n = as.numeric(outtime),
+         admittime_n = as.numeric(admittime),
+         dischtime_n = as.numeric(dischtime)
+         ) %>%
+  select(-intime, -outtime, -admittime, -dischtime)
+
+head(icu_cohort1)
+```
+
 4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
 **Solution:**  
 Perform mice, return 3 datasets:
 ```{r, eval=F}
 set.seed(1)
 
-icu_imp <- miceRanger(icu_cohort,
+icu_imp <- miceRanger(icu_cohort1,
                           m = 3,
                           valueSelector = "meanMatch", 
                           verbose=FALSE,
                           max.depth=10)
-
-saveRDS(as.data.frame(icu_imp),
-        file = "amp_results.rds")
 ```
-
 ```{r, eval=F}
-
-colSums(is.na(icu_imp))
-sum(is.na(icu_imp))
-
+saveRDS(icu_imp, file = "amp_results.rds")
 ```
+
 
 5. Make imputation diagnostic plots and explain what they mean.
 
