@@ -45,53 +45,70 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 
 3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.  
 **Solution:**  
-Importing data table `icustays_tble`:
-```{bash}
-zcat /mnt/mimiciv/1.0/hosp/icustays.csv.gz | awk 'END { print NR }'
+Importing data table `icu_cohort`:
+```{r}
+icu_cohort <- read_rds("icu_cohort.rds")
+```
+Count the number of `NA`'s:
+```{r}
+colSums(is.na(icu_cohort))
+sum(is.na(icu_cohort))
 ```
 
 ```{r}
-icustays_tble <- as_tibble(
-  read_csv("/mnt/mimiciv/1.0/icu/icustays.csv.gz",
-           na = c("",".","..","0"))
-) %>%
-  print(width = Inf)
+icu_cohort <-
+  icu_cohort %>%
+  select(-deathtime, -dod, -glucose, -hematocrit, -wbc, -bicarbonate,
+         -potassium, -magnesium, -calcium, -sodium, -creatinine, -chloride,
+         -NBPm, -NBPs, -HR, -RR, -Temp_F)
 ```
 
 Next, find the number of outliers in variable `los` and decide whether to discard it:
 ```{r}
-boxplot(icustays_tble$los)
-outliers1 <- boxplot(icustays_tble$los, plot = FALSE)$out
-icustays_tble$is_outlier <- 
-  ifelse(icustays_tble$los %in% boxplot.stats(icustays_tble$los)$out, 1, 0)
+boxplot(icu_cohort$los)
+outliers1 <- boxplot(icu_cohort$los, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$los %in% boxplot.stats(icu_cohort$los)$out, 1, 0)
 
-length(which(icustays_tble$is_outlier == 1))
+length(which(icu_cohort$is_outlier == 1))
 ```
 
-We have 7515 outliers in this variable (`los`) and it should be discarded:
+
+We have 5280 outliers in this variable (`los`) and it should be discarded:
 ```{r}
-icustays_tble <-
-  icustays_tble %>%
-  select(-los, -is_outlier) %>%
-  print(width = Inf)
+icu_cohort <-
+  icu_cohort %>%
+  select(-los, -is_outlier)
 ```
 
-Count the number of `NA`'s:
-```{r}
-colSums(is.na(icustays_tble))
-```
+
+
 
 4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
 **Solution:**  
 Perform mice, return 3 datasets:
 ```{r, eval=F}
-mrMeanMatch <- miceRanger(icustays_tble,
+set.seed(1)
+
+ampicustays <- amputeData(icustays_tble, perc = 0.05)
+
+
+amp_results <- miceRanger(ampicustays,
                           m = 3,
                           valueSelector = "meanMatch", 
-                          verbose=FALSE)
+                          verbose=FALSE,
+                          max.depth=10)
 
+saveRDS(as.data.frame(amp_results),
+        file = "amp_results.rds")
 ```
 
+```{r, eval=F}
+
+colSums(is.na(ampicustays))
+sum(is.na(ampicustays))
+
+```
 
 5. Make imputation diagnostic plots and explain what they mean.
 
