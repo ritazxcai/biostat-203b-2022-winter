@@ -73,7 +73,6 @@ icu_cohort$is_outlier <-
 length(which(icu_cohort$is_outlier == 1))
 ```
 
-
 We have 5280 outliers in this variable (`los`) and it should be discarded:
 ```{r}
 icu_cohort <-
@@ -81,8 +80,56 @@ icu_cohort <-
   select(-los, -is_outlier)
 ```
 
+Next, find the number of outliers in variable `anchor_age` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$anchor_age)
+outliers1 <- boxplot(icu_cohort$anchor_age, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$anchor_age %in% boxplot.stats(icu_cohort$anchor_age)$out, 1, 0)
 
+length(which(icu_cohort$is_outlier == 1))
+```
 
+We have no outliers in this variable (`anchor_age`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
+
+Next, find the number of outliers in variable `anchor_year` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$anchor_year)
+outliers1 <- boxplot(icu_cohort$anchor_year, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$anchor_year %in% boxplot.stats(icu_cohort$anchor_year)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have no outliers in this variable (`anchor_year`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
+
+Next, find the number of outliers in variable `age_adm` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$age_adm)
+outliers1 <- boxplot(icu_cohort$age_adm, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$age_adm %in% boxplot.stats(icu_cohort$age_adm)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have no outliers in this variable (`age_adm`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
 
 4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
 **Solution:**  
@@ -90,23 +137,20 @@ Perform mice, return 3 datasets:
 ```{r, eval=F}
 set.seed(1)
 
-ampicustays <- amputeData(icustays_tble, perc = 0.05)
-
-
-amp_results <- miceRanger(ampicustays,
+icu_imp <- miceRanger(icu_cohort,
                           m = 3,
                           valueSelector = "meanMatch", 
                           verbose=FALSE,
                           max.depth=10)
 
-saveRDS(as.data.frame(amp_results),
+saveRDS(as.data.frame(icu_imp),
         file = "amp_results.rds")
 ```
 
 ```{r, eval=F}
 
-colSums(is.na(ampicustays))
-sum(is.na(ampicustays))
+colSums(is.na(icu_imp))
+sum(is.na(icu_imp))
 
 ```
 
