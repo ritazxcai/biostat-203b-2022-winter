@@ -316,9 +316,11 @@ length(which(icustays_tble$is_outlier == 1))</code></pre>
 ##         intime        outtime 
 ##              0              0</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>Impute missing values by <code>miceRanger</code> (request <span class="math inline">\(m=3\)</span> data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting <code>max.depth=10</code> in the <code>miceRanger</code> function may cut some computing time.</li>
+<li>Impute missing values by <code>miceRanger</code> (request <span class="math inline">\(m=3\)</span> data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting <code>max.depth=10</code> in the <code>miceRanger</code> function may cut some computing time. <strong>Solution:</strong><br />
+Perform mice, return 3 datasets:</li>
 </ol>
 <pre class="r"><code>mrMeanMatch &lt;- miceRanger(icustays_tble,
+                          m = 3,
                           valueSelector = &quot;meanMatch&quot;, 
                           verbose=FALSE)</code></pre>
 <ol start="5" style="list-style-type: decimal">

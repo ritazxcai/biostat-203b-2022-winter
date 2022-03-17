@@ -82,9 +82,11 @@ colSums(is.na(icustays_tble))
 ```
 
 4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
-
+**Solution:**  
+Perform mice, return 3 datasets:
 ```{r, eval=F}
 mrMeanMatch <- miceRanger(icustays_tble,
+                          m = 3,
                           valueSelector = "meanMatch", 
                           verbose=FALSE)
 
