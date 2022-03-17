@@ -67,13 +67,13 @@ icustays_tble$is_outlier <-
 
 length(which(icustays_tble$is_outlier == 1))
 ```
-We have 7515 outliers in this variable and it should be discarded:
+
+We have 7515 outliers in this variable (`los`) and it should be discarded:
 ```{r}
 icustays_tble <-
   icustays_tble %>%
   select(-los, -is_outlier) %>%
   print(width = Inf)
-
 ```
 
 Count the number of `NA`'s:

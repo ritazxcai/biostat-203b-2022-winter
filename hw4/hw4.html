@@ -278,7 +278,7 @@ icustays_tble$is_outlier &lt;-
 
 length(which(icustays_tble$is_outlier == 1))</code></pre>
 <pre><code>## [1] 7515</code></pre>
-<p>We have 7515 outliers in this variable and it should be discarded:</p>
+<p>We have 7515 outliers in this variable (<code>los</code>) and it should be discarded:</p>
 <pre class="r"><code>icustays_tble &lt;-
   icustays_tble %&gt;%
   select(-los, -is_outlier) %&gt;%
