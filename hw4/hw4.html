@@ -222,8 +222,106 @@ suppressPackageStartupMessages(library(miceRanger))</code></pre>
 <li><p>Explain in a couple of sentences how the Multiple Imputation by Chained Equations (MICE) work.<br />
 <strong>Solution:</strong><br />
 <code>MICE</code> is a robust, informative method of dealing with missing values in datasets. The missing values in each specified variable in the dataset are imputed using the non-missing values of the other variables in the same dataset. The process of determining the values to be imputed involves a procedure called predictive mean matching (PMM). This process continues until all specified variables have been imputed and that an optimal convergence has been met (higher R-squared value).</p></li>
-<li><p>Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say &gt;5000 <code>NA</code>s. Replace apparent data entry errors by <code>NA</code>s.</p></li>
-<li><p>Impute missing values by <code>miceRanger</code> (request <span class="math inline">\(m=3\)</span> data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting <code>max.depth=10</code> in the <code>miceRanger</code> function may cut some computing time.</p></li>
+<li><p>Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say &gt;5000 <code>NA</code>s. Replace apparent data entry errors by <code>NA</code>s.<br />
+<strong>Solution:</strong><br />
+Importing data table <code>icustays_tble</code>:</p></li>
+</ol>
+<pre class="bash"><code>zcat /mnt/mimiciv/1.0/hosp/icustays.csv.gz | awk &#39;END { print NR }&#39;</code></pre>
+<pre><code>## gzip: /mnt/mimiciv/1.0/hosp/icustays.csv.gz: No such file or directory
+## 0</code></pre>
+<pre class="r"><code>icustays_tble &lt;- as_tibble(
+  read_csv(&quot;/mnt/mimiciv/1.0/icu/icustays.csv.gz&quot;,
+           na = c(&quot;&quot;,&quot;.&quot;,&quot;..&quot;,&quot;0&quot;))
+) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## Rows: 76540 Columns: 8
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (2): first_careunit, last_careunit
+## dbl  (4): subject_id, hadm_id, stay_id, los
+## dttm (2): intime, outtime
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre><code>## # A tibble: 76,540 × 8
+##    subject_id  hadm_id  stay_id first_careunit          
+##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                   
+##  1   17867402 24528534 31793211 Trauma SICU (TSICU)     
+##  2   14435996 28960964 31983544 Trauma SICU (TSICU)     
+##  3   17609946 27385897 33183475 Trauma SICU (TSICU)     
+##  4   18966770 23483021 34131444 Trauma SICU (TSICU)     
+##  5   12776735 20817525 34547665 Neuro Stepdown          
+##  6   10215159 24283593 34569476 Trauma SICU (TSICU)     
+##  7   14489052 26516390 35056286 Trauma SICU (TSICU)     
+##  8   15914763 28906020 36909804 Trauma SICU (TSICU)     
+##  9   16256226 20013290 39289362 Neuro Stepdown          
+## 10   19194449 21641999 39387567 Coronary Care Unit (CCU)
+##    last_careunit            intime              outtime               los
+##    &lt;chr&gt;                    &lt;dttm&gt;              &lt;dttm&gt;              &lt;dbl&gt;
+##  1 Trauma SICU (TSICU)      2154-03-03 04:11:00 2154-03-04 18:16:56 1.59 
+##  2 Trauma SICU (TSICU)      2150-06-19 17:57:00 2150-06-22 18:33:54 3.03 
+##  3 Trauma SICU (TSICU)      2138-02-05 18:54:00 2138-02-15 12:42:05 9.74 
+##  4 Trauma SICU (TSICU)      2123-10-25 10:35:00 2123-10-25 18:59:47 0.351
+##  5 Neuro Stepdown           2200-07-12 00:33:00 2200-07-13 16:44:40 1.67 
+##  6 Trauma SICU (TSICU)      2124-09-20 15:05:29 2124-09-21 22:06:58 1.29 
+##  7 Trauma SICU (TSICU)      2118-10-26 10:33:56 2118-10-26 20:28:10 0.413
+##  8 Trauma SICU (TSICU)      2176-12-14 12:00:00 2176-12-17 11:47:01 2.99 
+##  9 Neuro Stepdown           2150-12-20 16:09:08 2150-12-21 14:58:40 0.951
+## 10 Coronary Care Unit (CCU) 2123-11-12 02:53:35 2123-11-12 13:52:03 0.457
+## # … with 76,530 more rows</code></pre>
+<p>Next, find the number of outliers in variable <code>los</code> and decide whether to discard it:</p>
+<pre class="r"><code>boxplot(icustays_tble$los)</code></pre>
+<p><img src="data:image/png;base64,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QAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQgSUABkgQUIElAAZIEFCBJQAGSBBQg6f8BiGNM6/ZC05YAAAAASUVORK5CYII=" width="672" /></p>
+<pre class="r"><code>outliers1 &lt;- boxplot(icustays_tble$los, plot = FALSE)$out
+icustays_tble$is_outlier &lt;- 
+  ifelse(icustays_tble$los %in% boxplot.stats(icustays_tble$los)$out, 1, 0)
+
+length(which(icustays_tble$is_outlier == 1))</code></pre>
+<pre><code>## [1] 7515</code></pre>
+<p>We have 7515 outliers in this variable and it should be discarded:</p>
+<pre class="r"><code>icustays_tble &lt;-
+  icustays_tble %&gt;%
+  select(-los, -is_outlier) %&gt;%
+  print(width = Inf)</code></pre>
+<pre><code>## # A tibble: 76,540 × 7
+##    subject_id  hadm_id  stay_id first_careunit          
+##         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                   
+##  1   17867402 24528534 31793211 Trauma SICU (TSICU)     
+##  2   14435996 28960964 31983544 Trauma SICU (TSICU)     
+##  3   17609946 27385897 33183475 Trauma SICU (TSICU)     
+##  4   18966770 23483021 34131444 Trauma SICU (TSICU)     
+##  5   12776735 20817525 34547665 Neuro Stepdown          
+##  6   10215159 24283593 34569476 Trauma SICU (TSICU)     
+##  7   14489052 26516390 35056286 Trauma SICU (TSICU)     
+##  8   15914763 28906020 36909804 Trauma SICU (TSICU)     
+##  9   16256226 20013290 39289362 Neuro Stepdown          
+## 10   19194449 21641999 39387567 Coronary Care Unit (CCU)
+##    last_careunit            intime              outtime            
+##    &lt;chr&gt;                    &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 Trauma SICU (TSICU)      2154-03-03 04:11:00 2154-03-04 18:16:56
+##  2 Trauma SICU (TSICU)      2150-06-19 17:57:00 2150-06-22 18:33:54
+##  3 Trauma SICU (TSICU)      2138-02-05 18:54:00 2138-02-15 12:42:05
+##  4 Trauma SICU (TSICU)      2123-10-25 10:35:00 2123-10-25 18:59:47
+##  5 Neuro Stepdown           2200-07-12 00:33:00 2200-07-13 16:44:40
+##  6 Trauma SICU (TSICU)      2124-09-20 15:05:29 2124-09-21 22:06:58
+##  7 Trauma SICU (TSICU)      2118-10-26 10:33:56 2118-10-26 20:28:10
+##  8 Trauma SICU (TSICU)      2176-12-14 12:00:00 2176-12-17 11:47:01
+##  9 Neuro Stepdown           2150-12-20 16:09:08 2150-12-21 14:58:40
+## 10 Coronary Care Unit (CCU) 2123-11-12 02:53:35 2123-11-12 13:52:03
+## # … with 76,530 more rows</code></pre>
+<p>Count the number of <code>NA</code>’s:</p>
+<pre class="r"><code>colSums(is.na(icustays_tble))</code></pre>
+<pre><code>##     subject_id        hadm_id        stay_id first_careunit  last_careunit 
+##              0              0              0              0              0 
+##         intime        outtime 
+##              0              0</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Impute missing values by <code>miceRanger</code> (request <span class="math inline">\(m=3\)</span> data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting <code>max.depth=10</code> in the <code>miceRanger</code> function may cut some computing time.</li>
+</ol>
+<pre class="r"><code>mrMeanMatch &lt;- miceRanger(icustays_tble,
+                          valueSelector = &quot;meanMatch&quot;, 
+                          verbose=FALSE)</code></pre>
+<ol start="5" style="list-style-type: decimal">
 <li><p>Make imputation diagnostic plots and explain what they mean.</p></li>
 <li><p>Choose one of the imputed data sets to be used in Q2. This is <strong>not</strong> a good idea to use just one imputed data set or to average multiple imputed data sets. Explain in a couple of sentences what the correct Multiple Imputation strategy is.</p></li>
 </ol>

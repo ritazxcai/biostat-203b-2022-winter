@@ -43,9 +43,53 @@ Through the Shiny app developed in HW3, we observe abundant missing values in th
 **Solution:**  
 `MICE` is a robust, informative method of dealing with missing values in datasets. The missing values in each specified variable in the dataset are imputed using the non-missing values of the other variables in the same dataset. The process of determining the values to be imputed involves a procedure called predictive mean matching (PMM). This process continues until all specified variables have been imputed and that an optimal convergence has been met (higher R-squared value).  
 
-3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.
+3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.  
+**Solution:**  
+Importing data table `icustays_tble`:
+```{bash}
+zcat /mnt/mimiciv/1.0/hosp/icustays.csv.gz | awk 'END { print NR }'
+```
+
+```{r}
+icustays_tble <- as_tibble(
+  read_csv("/mnt/mimiciv/1.0/icu/icustays.csv.gz",
+           na = c("",".","..","0"))
+) %>%
+  print(width = Inf)
+```
+
+Next, find the number of outliers in variable `los` and decide whether to discard it:
+```{r}
+boxplot(icustays_tble$los)
+outliers1 <- boxplot(icustays_tble$los, plot = FALSE)$out
+icustays_tble$is_outlier <- 
+  ifelse(icustays_tble$los %in% boxplot.stats(icustays_tble$los)$out, 1, 0)
+
+length(which(icustays_tble$is_outlier == 1))
+```
+We have 7515 outliers in this variable and it should be discarded:
+```{r}
+icustays_tble <-
+  icustays_tble %>%
+  select(-los, -is_outlier) %>%
+  print(width = Inf)
+
+```
+
+Count the number of `NA`'s:
+```{r}
+colSums(is.na(icustays_tble))
+```
 
 4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
+
+```{r, eval=F}
+mrMeanMatch <- miceRanger(icustays_tble,
+                          valueSelector = "meanMatch", 
+                          verbose=FALSE)
+
+```
+
 
 5. Make imputation diagnostic plots and explain what they mean.
 
