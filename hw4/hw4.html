@@ -482,7 +482,43 @@ annotate_figure(
 <h2>Q2. Predicting 30-day mortality</h2>
 <p>Develop at least two analytic approaches for predicting the 30-day mortality of patients admitted to ICU using demographic information (gender, age, marital status, ethnicity), first lab measurements during ICU stay, and first vital measurements during ICU stay. For example, you can use (1) logistic regression (<code>glm()</code> function in base R or keras), (2) logistic regression with lasso penalty (glmnet or keras package), (3) random forest (randomForest package), or (4) neural network (keras package).</p>
 <ol style="list-style-type: decimal">
-<li><p>Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.</p></li>
+<li>Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.</li>
+</ol>
+<p>Preparing the dataset with variables of interest:</p>
+<pre class="r"><code>library(dplyr)
+
+train1 &lt;-
+  data1 %&gt;%
+  select(thirty_day_mort, gender, age_adm, marital_status, ethnicity)</code></pre>
+<pre class="r"><code>sum(is.na(train1))
+head(train1)</code></pre>
+<p>Method 1: logistic regression with lasso penalty</p>
+<pre class="r"><code># set training and test data set
+smp_size &lt;- floor(0.8 * nrow(train1))
+set.seed(123)
+train_ind &lt;- sample(seq_len(nrow(train1)), size = smp_size)
+train1$thirty_day_mort = as.factor(train1$thirty_day_mort)
+train &lt;- train1[train_ind, ]
+test &lt;- train1[-train_ind, ]</code></pre>
+<p>Install the packages if needed:</p>
+<pre class="r"><code>install.packages(&quot;plotmo&quot;)
+install.packages(&quot;glmnet&quot;)</code></pre>
+<p>Using <code>glmnet</code> and <code>plotmo</code>:</p>
+<pre class="r"><code>library(glmnet)
+library(plotmo)
+
+# transform the dataset into matrix form
+x = as.matrix(train[,-1])
+tdm = as.matrix(train[,1])
+
+# build a model, set family as multinomial for multinomial logistic regression
+lasso.mod = glmnet(x, 
+                   tdm, # thirty_day_mort, the outcome of interest
+                   alpha = 1,
+                   family = &quot;multinomial&quot;,
+                   type.multinomial = &quot;grouped&quot;)
+plot_glmnet(lasso.mod, label=5, nresponse = 3) </code></pre>
+<ol start="2" style="list-style-type: decimal">
 <li><p>Train the models using the training set.</p></li>
 <li><p>Compare model prediction performance on the test set.</p></li>
 </ol>

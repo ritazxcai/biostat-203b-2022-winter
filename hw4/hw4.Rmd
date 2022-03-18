@@ -220,6 +220,56 @@ Develop at least two analytic approaches for predicting the 30-day mortality of 
 
 1. Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.
 
+Preparing the dataset with variables of interest:
+```{r, eval=F}
+library(dplyr)
+
+train1 <-
+  data1 %>%
+  select(thirty_day_mort, gender, age_adm, marital_status, ethnicity)
+
+```
+
+```{r,eval=F}
+sum(is.na(train1))
+head(train1)
+```
+Method 1: logistic regression with lasso penalty
+```{r,eval=F}
+# set training and test data set
+smp_size <- floor(0.8 * nrow(train1))
+set.seed(123)
+train_ind <- sample(seq_len(nrow(train1)), size = smp_size)
+train1$thirty_day_mort = as.factor(train1$thirty_day_mort)
+train <- train1[train_ind, ]
+test <- train1[-train_ind, ]
+```
+
+Install the packages if needed:
+```{r, eval=F}
+install.packages("plotmo")
+install.packages("glmnet")
+```
+
+Using `glmnet` and `plotmo`:
+```{r, eval=F}
+library(glmnet)
+library(plotmo)
+
+# transform the dataset into matrix form
+x = as.matrix(train[,-1])
+tdm = as.matrix(train[,1])
+
+# build a model, set family as multinomial for multinomial logistic regression
+lasso.mod = glmnet(x, 
+                   tdm, # thirty_day_mort, the outcome of interest
+                   alpha = 1,
+                   family = "multinomial",
+                   type.multinomial = "grouped")
+plot_glmnet(lasso.mod, label=5, nresponse = 3) 
+
+```
+
 2. Train the models using the training set.
 
 3. Compare model prediction performance on the test set.
