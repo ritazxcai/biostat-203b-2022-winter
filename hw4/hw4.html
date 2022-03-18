@@ -553,6 +553,25 @@ mean(predicted.classes == observed.classes)</code></pre>
 <li>Compare model prediction performance on the test set.<br />
 <strong>Accuracy:</strong> 0.7955786</li>
 </ol>
+<p><strong>Method 2: random forest</strong></p>
+<pre class="r"><code>library(dplyr)
+library(randomForest)
+
+# Define the control
+trControl &lt;- trainControl(method = &quot;cv&quot;,
+    number = 3,
+    search = &quot;grid&quot;)
+
+
+set.seed(1234)
+rf &lt;- train(thirty_day_mort~.,
+            data = train,
+            method = &quot;rf&quot;,
+            metric = &quot;Accuracy&quot;)
+
+print(rf)</code></pre>
+<pre class="r"><code>best_mtry &lt;- rf_mtry$bestTune$mtry
+best_mtry</code></pre>
 </div>
 
 
