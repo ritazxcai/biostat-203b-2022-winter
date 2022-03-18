@@ -218,6 +218,7 @@ annotate_figure(
 
 Develop at least two analytic approaches for predicting the 30-day mortality of patients admitted to ICU using demographic information (gender, age, marital status, ethnicity), first lab measurements during ICU stay, and first vital measurements during ICU stay. For example, you can use (1) logistic regression (`glm()` function in base R or keras), (2) logistic regression with lasso penalty (glmnet or keras package), (3) random forest (randomForest package), or (4) neural network (keras package).
 
+**Method 1: logistic regression with lasso penalty**  
 1. Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.
 
 Preparing the dataset with variables of interest:
@@ -234,9 +235,10 @@ train1 <-
 sum(is.na(train1))
 head(train1)
 ```
-Method 1: logistic regression with lasso penalty
 ```{r,eval=F}
 # set training and test data set
+train1 <- na.omit(train1)
+
 smp_size <- floor(0.8 * nrow(train1))
 set.seed(123)
 train_ind <- sample(seq_len(nrow(train1)), size = smp_size)
@@ -245,9 +247,12 @@ train <- train1[train_ind, ]
 test <- train1[-train_ind, ]
 ```
 
+2. Train the models using the training set.
+
 Install the packages if needed:
 ```{r, eval=F}
 install.packages("plotmo")
+install.packages("caret")
 install.packages("glmnet")
 ```
 
@@ -255,22 +260,51 @@ Using `glmnet` and `plotmo`:
 ```{r, eval=F}
 library(glmnet)
 library(plotmo)
+library(caret)
 
 # transform the dataset into matrix form
-x = as.matrix(train[,-1])
-tdm = as.matrix(train[,1])
+x <- model.matrix(thirty_day_mort~., train)[,-1]
+y <- ifelse(train$thirty_day_mort == "yes", 1, 0)
 
 # build a model, set family as multinomial for multinomial logistic regression
 lasso.mod = glmnet(x, 
-                   tdm, # thirty_day_mort, the outcome of interest
+                   y, # thirty_day_mort, the outcome of interest
                    alpha = 1,
-                   family = "multinomial",
-                   type.multinomial = "grouped")
-plot_glmnet(lasso.mod, label=5, nresponse = 3) 
+                   family = "binomial")
+plot_glmnet(lasso.mod, label = 5, nresponse = 2) 
 
 ```
 
-2. Train the models using the training set.
+```{r, eval=F}
+library(glmnet)
+library(dplyr)
 
-3. Compare model prediction performance on the test set.
+# Find the best lambda using cross-validation
+set.seed(123) 
+cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial")
 
+
+# Fit the final model on the training data
+model <- glmnet(x, y, alpha = 1, family = "binomial",
+                lambda = cv.lasso$lambda.min)
+
+
+# Display regression coefficients
+coef(model)
+
+
+# Make predictions on the test data
+x.test <- model.matrix(thirty_day_mort ~., test)[,-1]
+probabilities <- model %>%
+  predict(newx = x.test)
+predicted.classes <- ifelse(probabilities > 0.5, "yes", "no")
+
+
+# Model accuracy
+observed.classes <- test$thirty_day_mort
+mean(predicted.classes == observed.classes)
+
+```
+
+3. Compare model prediction performance on the test set.  
+**Accuracy:** 0.7955786
