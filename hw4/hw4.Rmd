@@ -249,7 +249,7 @@ test <- train1[-train_ind, ]
 
 2. Train the models using the training set.
 
-Install the packages if needed:
+Install the packages if needed for reproducibility:
 ```{r, eval=F}
 install.packages("plotmo")
 install.packages("caret")
@@ -309,32 +309,47 @@ mean(predicted.classes == observed.classes)
 3. Compare model prediction performance on the test set.  
 **Accuracy:** 0.7955786  
   
-  
 
 
-**Method 2: random forest**  
+
+**Method 2: glm**  
+Training:
 ```{r,eval=F}
-library(dplyr)
-library(randomForest)
-
-# Define the control
-trControl <- trainControl(method = "cv",
-    number = 3,
-    search = "grid")
-
 
 set.seed(1234)
-rf <- train(thirty_day_mort~.,
-            data = train,
-            method = "rf",
-            metric = "Accuracy")
 
-print(rf)
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample <- 1: total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+    } else {
+        return (data[-train_sample, ])
+    }
+}
+data_train <- create_train_test(train1, 0.8, train = TRUE)
+data_test <- create_train_test(train1, 0.8, train = FALSE)
+dim(data_train)
+dim(data_test)
+
+# training the train set
+formula <- thirty_day_mort~.
+logit <- glm(formula, data = data_train, family = 'binomial')
+summary(logit)
 
 ```
 
-
+Testing accuracy:  
 ```{r,eval=F}
-best_mtry <- rf_mtry$bestTune$mtry
-best_mtry
+
+predict <- predict(logit, data_test, type = 'response')
+# confusion matrix
+table_mat <- table(data_test$thirty_day_mort, predict > 0.5)
+table_mat
+
+
+accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
+accuracy_Test
 ```
+This gives an **accuracy** of 0.7826905.

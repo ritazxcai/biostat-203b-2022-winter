@@ -503,7 +503,7 @@ test &lt;- train1[-train_ind, ]</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Train the models using the training set.</li>
 </ol>
-<p>Install the packages if needed:</p>
+<p>Install the packages if needed for reproducibility:</p>
 <pre class="r"><code>install.packages(&quot;plotmo&quot;)
 install.packages(&quot;caret&quot;)
 install.packages(&quot;glmnet&quot;)</code></pre>
@@ -553,25 +553,39 @@ mean(predicted.classes == observed.classes)</code></pre>
 <li>Compare model prediction performance on the test set.<br />
 <strong>Accuracy:</strong> 0.7955786</li>
 </ol>
-<p><strong>Method 2: random forest</strong></p>
-<pre class="r"><code>library(dplyr)
-library(randomForest)
+<p><strong>Method 2: glm</strong><br />
+Training:</p>
+<pre class="r"><code>set.seed(1234)
 
-# Define the control
-trControl &lt;- trainControl(method = &quot;cv&quot;,
-    number = 3,
-    search = &quot;grid&quot;)
+create_train_test &lt;- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample &lt;- 1: total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+    } else {
+        return (data[-train_sample, ])
+    }
+}
+data_train &lt;- create_train_test(train1, 0.8, train = TRUE)
+data_test &lt;- create_train_test(train1, 0.8, train = FALSE)
+dim(data_train)
+dim(data_test)
+
+# training the train set
+formula &lt;- thirty_day_mort~.
+logit &lt;- glm(formula, data = data_train, family = &#39;binomial&#39;)
+summary(logit)</code></pre>
+<p>Testing accuracy:</p>
+<pre class="r"><code>predict &lt;- predict(logit, data_test, type = &#39;response&#39;)
+# confusion matrix
+table_mat &lt;- table(data_test$thirty_day_mort, predict &gt; 0.5)
+table_mat
 
 
-set.seed(1234)
-rf &lt;- train(thirty_day_mort~.,
-            data = train,
-            method = &quot;rf&quot;,
-            metric = &quot;Accuracy&quot;)
-
-print(rf)</code></pre>
-<pre class="r"><code>best_mtry &lt;- rf_mtry$bestTune$mtry
-best_mtry</code></pre>
+accuracy_Test &lt;- sum(diag(table_mat)) / sum(table_mat)
+accuracy_Test</code></pre>
+<p>This gives an <strong>accuracy</strong> of 0.7826905.</p>
 </div>
 
 
