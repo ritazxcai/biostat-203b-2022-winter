@@ -212,7 +212,10 @@ annotate_figure(
 )
 ```
 
-6. Choose one of the imputed data sets to be used in Q2. This is **not** a good idea to use just one imputed data set or to average multiple imputed data sets. Explain in a couple of sentences what the correct Multiple Imputation strategy is.
+6. Choose one of the imputed data sets to be used in Q2. This is **not** a good idea to use just one imputed data set or to average multiple imputed data sets. Explain in a couple of sentences what the correct Multiple Imputation strategy is.  
+**Solution:**  
+The correct strategy is to select a imputed dataset with the highest correlations among variables of interest. When convergence has been met, we can terminate the iterations.  
+
 
 ## Q2. Predicting 30-day mortality
 
