@@ -1,0 +1,345 @@
+---
+title: "Biostat 203B Homework 4"
+author: Zixuan Cai
+subtitle: Due Mar 18 @ 11:59PM
+output:
+  # ioslides_presentation: default
+  html_document:
+    toc: true
+    toc_depth: 4
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+Display machine information:
+```{r}
+sessionInfo()
+```
+Load database libraries and the tidyverse frontend:
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(miceRanger))
+```
+
+## Q1. Missing data
+
+Through the Shiny app developed in HW3, we observe abundant missing values in the MIMIC-IV ICU cohort we created. In this question, we use multiple imputation to obtain a data set without missing values.
+
+0. Read following tutorials on the R package miceRanger for imputation: <https://github.com/farrellday/miceRanger>, <https://cran.r-project.org/web/packages/miceRanger/vignettes/miceAlgorithm.html>.
+
+    A more thorough book treatment of the practical imputation strategies is the book [*_Flexible Imputation of Missing Data_*](https://stefvanbuuren.name/fimd/) by Stef van Buuren. 
+
+1. Explain the jargon MCAR, MAR, and MNAR.  
+**Solution:**  
+`MCAR` stands for "missing completely at random", which means that the probability of being missing is the same for all cases.  
+`MAR` stands for "missing at random", a much broader class than `MCAR`, which means that the probability of being missing is the same only within groups defined by the observed data, then the data are missing at random. It is also more general and more realistic than `MCAR`, and thus modern missing data methods generally start from the `MAR` assumption.  
+`NMAR` is the case when neither `MAR` nor`MAR` holds and it stands for "not missing at random"——the probability of being missing varies for reasons that are unknown to us.  
+
+
+2. Explain in a couple of sentences how the Multiple Imputation by Chained Equations (MICE) work.  
+**Solution:**  
+`MICE` is a robust, informative method of dealing with missing values in datasets. The missing values in each specified variable in the dataset are imputed using the non-missing values of the other variables in the same dataset. The process of determining the values to be imputed involves a procedure called predictive mean matching (PMM). This process continues until all specified variables have been imputed and that an optimal convergence has been met (higher R-squared value).  
+
+3. Perform a data quality check of the ICU stays data. Discard variables with substantial missingness, say >5000 `NA`s. Replace apparent data entry errors by `NA`s.  
+**Solution:**  
+Importing data table `icu_cohort`:
+```{r}
+icu_cohort <- read_rds("icu_cohort.rds")
+```
+Count the number of `NA`'s:
+```{r}
+colSums(is.na(icu_cohort))
+sum(is.na(icu_cohort))
+```
+
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-deathtime, -dod, -glucose, -hematocrit, -wbc, -bicarbonate,
+         -potassium, -magnesium, -calcium, -sodium, -creatinine, -chloride,
+         -NBPm, -NBPs, -HR, -RR, -Temp_F, -edregtime, -edouttime)
+```
+
+Next, find the number of outliers in variable `los` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$los)
+outliers1 <- boxplot(icu_cohort$los, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$los %in% boxplot.stats(icu_cohort$los)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have 5280 outliers in this variable (`los`) and it should be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-los, -is_outlier)
+```
+
+Next, find the number of outliers in variable `anchor_age` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$anchor_age)
+outliers1 <- boxplot(icu_cohort$anchor_age, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$anchor_age %in% boxplot.stats(icu_cohort$anchor_age)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have no outliers in this variable (`anchor_age`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
+
+Next, find the number of outliers in variable `anchor_year` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$anchor_year)
+outliers1 <- boxplot(icu_cohort$anchor_year, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$anchor_year %in% boxplot.stats(icu_cohort$anchor_year)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have no outliers in this variable (`anchor_year`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
+
+Next, find the number of outliers in variable `age_adm` and decide whether to discard it:
+```{r}
+boxplot(icu_cohort$age_adm)
+outliers1 <- boxplot(icu_cohort$age_adm, plot = FALSE)$out
+icu_cohort$is_outlier <- 
+  ifelse(icu_cohort$age_adm %in% boxplot.stats(icu_cohort$age_adm)$out, 1, 0)
+
+length(which(icu_cohort$is_outlier == 1))
+```
+
+We have no outliers in this variable (`age_adm`) and it should not be discarded:
+```{r}
+icu_cohort <-
+  icu_cohort %>%
+  select(-is_outlier)
+```
+
+```{r}
+head(icu_cohort)
+```
+
+```{r}
+icu_cohort1 <-
+  icu_cohort %>%
+  mutate(intime_n = as.numeric(intime),
+         outtime_n = as.numeric(outtime),
+         admittime_n = as.numeric(admittime),
+         dischtime_n = as.numeric(dischtime)
+         ) %>%
+  select(-intime, -outtime, -admittime, -dischtime)
+
+head(icu_cohort1)
+```
+
+4. Impute missing values by `miceRanger` (request $m=3$ data sets). This step is computational intensive. Make sure to save the imputation results as a file. Hint: Setting `max.depth=10` in the `miceRanger` function may cut some computing time.
+**Solution:**  
+Perform mice, return 3 datasets:
+```{r, eval=F}
+set.seed(1)
+
+icu_imp <- miceRanger(icu_cohort1,
+                          m = 3,
+                          valueSelector = "meanMatch", 
+                          verbose=FALSE,
+                          max.depth=10)
+```
+```{r, eval=F}
+saveRDS(icu_imp, file = "icu_cohort.rds")
+```
+
+**For reproducibility:**
+Read the imputed data from the RDS file created from the above code chunk to save run time:
+```{r, eval=T}
+icu_imp <- readRDS("icu_cohort.rds")
+```
+
+5. Make imputation diagnostic plots and explain what they mean.  
+Return the imputed data:
+```{r, eval=T}
+dataList <- completeData(icu_imp)
+head(dataList[[1]],10)
+head(dataList[[2]],10)
+head(dataList[[3]],10)
+```
+
+
+Diagnostic plots:
+```{r}
+plotDistributions(miceObj = icu_imp)
+plotCorrelations(miceObj = icu_imp)
+plotVarConvergence(miceObj = icu_imp)
+plotModelError(miceObj = icu_imp)
+
+```  
+
+These diagnostic plots show the accuracy, distributions, convergence and the change in R-squared values after 5 iteractions of multiple imputations.
+
+
+
+6. Choose one of the imputed data sets to be used in Q2. This is **not** a good idea to use just one imputed data set or to average multiple imputed data sets. Explain in a couple of sentences what the correct Multiple Imputation strategy is.  
+**Solution:**  
+The correct strategy is to select a imputed dataset with the highest correlations among variables of interest. When convergence has been met, we can terminate the iterations.  
+
+```{r}
+data1 <- dataList[[1]]
+head(data1)
+```
+
+
+
+## Q2. Predicting 30-day mortality
+
+Develop at least two analytic approaches for predicting the 30-day mortality of patients admitted to ICU using demographic information (gender, age, marital status, ethnicity), first lab measurements during ICU stay, and first vital measurements during ICU stay. For example, you can use (1) logistic regression (`glm()` function in base R or keras), (2) logistic regression with lasso penalty (glmnet or keras package), (3) random forest (randomForest package), or (4) neural network (keras package).
+
+**Method 1: logistic regression with lasso penalty**  
+1. Partition data into 80% training set and 20% test set. Stratify partitioning according the 30-day mortality status.
+
+Preparing the dataset with variables of interest:
+```{r, eval=F}
+library(dplyr)
+
+train1 <-
+  data1 %>%
+  select(thirty_day_mort, gender, age_adm, marital_status, ethnicity)
+
+```
+
+```{r,eval=F}
+sum(is.na(train1))
+head(train1)
+```
+```{r,eval=F}
+# set training and test data set
+train1 <- na.omit(train1)
+
+smp_size <- floor(0.8 * nrow(train1))
+set.seed(123)
+train_ind <- sample(seq_len(nrow(train1)), size = smp_size)
+train1$thirty_day_mort = as.factor(train1$thirty_day_mort)
+train <- train1[train_ind, ]
+test <- train1[-train_ind, ]
+```
+
+2. Train the models using the training set.
+
+Install the packages if needed for reproducibility:
+```{r, eval=F}
+install.packages("plotmo")
+install.packages("caret")
+install.packages("glmnet")
+```
+
+Using `glmnet` and `plotmo`:
+```{r, eval=F}
+library(glmnet)
+library(plotmo)
+library(caret)
+
+# transform the dataset into matrix form
+x <- model.matrix(thirty_day_mort~., train)[,-1]
+y <- ifelse(train$thirty_day_mort == "yes", 1, 0)
+
+# build a model, set family as multinomial for multinomial logistic regression
+lasso.mod = glmnet(x, 
+                   y, # thirty_day_mort, the outcome of interest
+                   alpha = 1,
+                   family = "binomial")
+plot_glmnet(lasso.mod, label = 5, nresponse = 2) 
+
+```
+
+```{r, eval=F}
+library(glmnet)
+library(dplyr)
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial")
+
+
+# Fit the final model on the training data
+model <- glmnet(x, y, alpha = 1, family = "binomial",
+                lambda = cv.lasso$lambda.min)
+
+
+# Display regression coefficients
+coef(model)
+
+
+# Make predictions on the test data
+x.test <- model.matrix(thirty_day_mort ~., test)[,-1]
+probabilities <- model %>%
+  predict(newx = x.test)
+predicted.classes <- ifelse(probabilities > 0.5, "yes", "no")
+
+
+# Model accuracy
+observed.classes <- test$thirty_day_mort
+mean(predicted.classes == observed.classes)
+
+```
+
+3. Compare model prediction performance on the test set.  
+**Accuracy:** 0.7955786  
+  
+
+
+
+**Method 2: glm**  
+Training:
+```{r,eval=F}
+
+set.seed(1234)
+
+create_train_test <- function(data, size = 0.8, train = TRUE) {
+    n_row = nrow(data)
+    total_row = size * n_row
+    train_sample <- 1: total_row
+    if (train == TRUE) {
+        return (data[train_sample, ])
+    } else {
+        return (data[-train_sample, ])
+    }
+}
+data_train <- create_train_test(train1, 0.8, train = TRUE)
+data_test <- create_train_test(train1, 0.8, train = FALSE)
+dim(data_train)
+dim(data_test)
+
+# training the train set
+formula <- thirty_day_mort~.
+logit <- glm(formula, data = data_train, family = 'binomial')
+summary(logit)
+
+```
+
+Testing accuracy:  
+```{r,eval=F}
+
+predict <- predict(logit, data_test, type = 'response')
+# confusion matrix
+table_mat <- table(data_test$thirty_day_mort, predict > 0.5)
+table_mat
+
+
+accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
+accuracy_Test
+```
+This gives an **accuracy** of 0.7826905.
